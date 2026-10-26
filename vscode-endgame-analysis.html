@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="结合 VS Code 公开代码，深入分析 UI 自动规划验证与自愈、黄金场景定义和回归测试、Endgame 测试编排与发布质量管理。">
+  <meta name="color-scheme" content="light">
+  <title>VS Code 自动化测试与 Endgame：规划、自愈、黄金场景和发布质量</title>
+  <style>
+    :root {
+      --paper: #fff;
+      --canvas: #f3f6fa;
+      --ink: #172b40;
+      --muted: #52677b;
+      --blue: #0066b8;
+      --blue-soft: #eaf3fc;
+      --line: #d9e2ec;
+      --amber: #926000;
+      --amber-soft: #fff6df;
+      --rail: 260px;
+      --body: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      --display: "Avenir Next", "Segoe UI", "PingFang SC", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 34px; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 16px/1.85 var(--body); }
+    a { color: var(--blue); text-underline-offset: 4px; }
+    a:hover { text-decoration-thickness: 2px; }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+    button { font: inherit; }
+    .skip { position: fixed; left: 20px; top: -100px; padding: 10px 18px; background: var(--paper); z-index: 10; }
+    .skip:focus { top: 10px; }
+    .reading-progress { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: var(--blue); z-index: 20; }
+    .rail { width: var(--rail); position: fixed; inset: 0 auto 0 0; overflow: auto; padding: 35px 23px 24px; background: var(--paper); border-right: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 700; line-height: 1.3; }
+    .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; background: var(--blue); color: white; font: 700 23px/1 var(--mono); border-radius: 8px 2px 8px 2px; }
+    .brand small { display: block; margin-top: 4px; font: 10px/1.4 var(--mono); letter-spacing: .12em; color: var(--muted); }
+    .nav-label { margin: 38px 0 12px; color: var(--muted); font: 12px/1.5 var(--mono); letter-spacing: .1em; }
+    .toc { display: grid; gap: 4px; }
+    .toc a { padding: 8px 10px; border-left: 2px solid transparent; border-radius: 0 4px 4px 0; color: var(--muted); text-decoration: none; font-size: 13px; line-height: 1.65; }
+    .toc a:hover, .toc a[aria-current="location"] { color: var(--blue); background: var(--blue-soft); border-left-color: var(--blue); }
+    .rail-note { border-top: 1px solid var(--line); margin-top: 30px; padding-top: 18px; font-size: 11px; color: var(--muted); }
+    .rail-note p { margin: 5px 0; }
+    .main { margin-left: var(--rail); padding: 48px clamp(25px, 5vw, 88px) 70px; }
+    .document { max-width: 1030px; margin: 0 auto; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 35px; }
+    .eyebrow { margin: 0; color: var(--blue); font: 12px/1.5 var(--mono); letter-spacing: .13em; }
+    .print-button { padding: 7px 14px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); color: var(--ink); cursor: pointer; font-size: 12px; }
+    .print-button:hover { border-color: var(--blue); color: var(--blue); }
+    h1, h2, h3, h4 { font-family: var(--display); line-height: 1.4; }
+    h1 { margin: 0 0 23px; font-size: clamp(36px, 4.2vw, 61px); font-weight: 750; letter-spacing: -.045em; }
+    h1 .code-title { display: block; font-family: var(--mono); font-size: .9em; letter-spacing: -.055em; color: var(--blue); }
+    .lead { max-width: 790px; margin: 0; font-size: 19px; line-height: 1.9; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 24px; color: var(--muted); font-size: 12px; }
+    .thesis { margin: 30px 0 0; padding: 22px 26px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); font-size: 18px; }
+    .scope { margin: 20px 0 30px; color: var(--muted); font-size: 13px; }
+    .quality-map { margin: 30px 0 44px; background: var(--ink); color: white; padding: 25px; border-radius: 8px; }
+    .quality-map figcaption { color: #b8d5ee; margin-bottom: 18px; font: 11px/1.6 var(--mono); letter-spacing: .08em; }
+    .map-flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .map-flow li { border-top: 2px solid #70b7f0; padding-top: 12px; min-width: 0; }
+    .map-flow strong { display: block; font-size: 14px; }
+    .map-flow span { display: block; margin-top: 4px; color: #c6d5e4; font-size: 11px; }
+    .map-note { margin: 17px 0 0; font-size: 11px; color: #c6d5e4; }
+    .chapter { margin-top: 28px; padding: 32px clamp(20px, 3.3vw, 46px); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; }
+    .section-tag { display: block; margin-bottom: 8px; font: 11px/1.5 var(--mono); letter-spacing: .09em; color: var(--muted); }
+    h2 { margin: 0 0 22px; font-size: clamp(23px, 2.6vw, 31px); letter-spacing: -.025em; }
+    h3 { margin: 28px 0 12px; font-size: 19px; }
+    h4 { margin: 22px 0 9px; font-size: 16px; }
+    p { margin: 12px 0; }
+    strong { font-weight: 650; }
+    ul, ol { padding-left: 24px; margin: 12px 0; }
+    li { padding-left: 2px; margin: 6px 0; }
+    code { font: .87em/1.6 var(--mono); padding: 2px 5px; border-radius: 3px; background: var(--canvas); overflow-wrap: anywhere; }
+    .code-block { margin: 20px 0; padding: 18px 20px; background: var(--canvas); border: 1px solid var(--line); border-radius: 5px; overflow-x: auto; font: 12px/1.85 var(--mono); tab-size: 2; }
+    .code-block code { padding: 0; background: none; font: inherit; overflow-wrap: normal; }
+    .table-wrap { overflow-x: auto; margin: 19px 0; border: 1px solid var(--line); border-radius: 5px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.85; }
+    th, td { padding: 13px 15px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); min-width: 120px; }
+    th { background: var(--canvas); color: var(--muted); font-weight: 650; }
+    tr:last-child td { border-bottom: 0; }
+    .table-wrap th:first-child, .table-wrap td:first-child { min-width: 135px; }
+    .note { padding: 16px 20px; margin: 20px 0; background: var(--blue-soft); border-radius: 4px; font-size: 14px; }
+    .caution { background: var(--amber-soft); }
+    .caution > strong:first-child { color: var(--amber); }
+    .note p:first-child { margin-top: 0; }
+    .note p:last-child { margin-bottom: 0; }
+    .source-line { margin-top: 22px; font-size: 12px; color: var(--muted); }
+    .case { padding: 20px 23px; background: var(--canvas); border-radius: 5px; margin: 20px 0; }
+    .case h3 { margin-top: 0; font-size: 17px; }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 20px 0; font-size: 13px; }
+    .flow .step { background: var(--blue-soft); padding: 9px 13px; border: 1px solid #c8def2; border-radius: 4px; }
+    .flow .arrow { color: var(--muted); }
+    .conclusion { background: var(--blue-soft); border-color: #c8def2; }
+    .conclusion p:last-child { font-size: 18px; font-weight: 600; line-height: 1.9; }
+    .sources-list { padding-left: 22px; font-size: 13px; }
+    .sources-list li { margin: 13px 0; }
+    .sources-list span { display: block; color: var(--muted); font-size: 12px; }
+    .footer { margin-top: 28px; color: var(--muted); font-size: 11px; display: flex; justify-content: space-between; gap: 20px; }
+    .footer a { color: inherit; }
+    @media (min-width: 1600px) { .main { padding-top: 58px; } }
+    @media (max-width: 1100px) {
+      :root { --rail: 220px; }
+      .rail { padding-left: 16px; padding-right: 16px; }
+      .main { padding: 32px 26px 50px; }
+      .map-flow { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 760px) {
+      .rail { position: static; width: auto; padding: 20px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { font-size: 15px; }
+      .brand small { font-size: 9px; }
+      .nav-label { margin: 20px 0 10px; }
+      .toc { display: flex; overflow: auto; gap: 6px; padding: 3px 3px 9px; }
+      .toc a { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; font-size: 12px; }
+      .toc a[aria-current="location"] { border-color: var(--blue); }
+      .rail-note { display: none; }
+      .main { margin-left: 0; padding: 25px 16px 35px; }
+      .toolbar { margin-bottom: 23px; }
+      .eyebrow { font-size: 10px; letter-spacing: .06em; }
+      .print-button { padding: 6px 9px; white-space: nowrap; }
+      .lead { font-size: 17px; }
+      .thesis { padding: 18px; font-size: 16px; }
+      .chapter { padding: 25px 19px; }
+      .map-flow { grid-template-columns: 1fr 1fr; gap: 16px; }
+      .quality-map { padding: 20px; }
+      h3 { font-size: 18px; }
+      .case { padding: 17px; }
+      .footer { flex-direction: column; gap: 6px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @page { size: A4; margin: 18mm 15mm; }
+    @media print {
+      body { background: white; color: #111; font-size: 10.5pt; line-height: 1.75; }
+      .rail, .toolbar, .reading-progress, .skip, .footer a { display: none; }
+      .main { margin: 0; padding: 0; }
+      .document { max-width: none; }
+      h1 { font-size: 30pt; }
+      h2 { font-size: 19pt; }
+      h3 { font-size: 13pt; }
+      h1, h2, h3, h4 { break-after: avoid; }
+      p, li { orphans: 3; widows: 3; }
+      .lead, .thesis { font-size: 12pt; }
+      .chapter { padding: 22px 0; border: 0; border-top: 1px solid #bbb; border-radius: 0; margin-top: 22px; }
+      .table-wrap { overflow: visible; }
+      table { font-size: 9pt; }
+      th, td { padding: 8px; min-width: 0 !important; }
+      tr { break-inside: avoid; }
+      thead { display: table-header-group; }
+      .quality-map { color: #111; background: #f4f4f4; break-inside: avoid; }
+      .quality-map figcaption, .map-flow span, .map-note { color: #333; }
+      .map-flow { grid-template-columns: repeat(5, 1fr); }
+      .note, .case, .flow { break-inside: avoid; }
+      .code-block { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; }
+      .code-block code { overflow-wrap: anywhere; }
+      a { color: #164f7a; }
+      .sources-list a::after { content: " — " attr(href); font-size: 8pt; overflow-wrap: anywhere; }
+      .conclusion p:last-child { font-size: 12pt; }
+      .footer { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">跳到正文</a>
+  <div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
+  <aside class="rail" aria-label="文章目录">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">&gt;</span>
+      <div>VS Code · Endgame<small>RELEASE QUALITY / FIELD NOTES</small></div>
+    </div>
+    <p class="nav-label">阅读目录</p>
+    <nav class="toc">
+      <a href="#overview">测试范围与目标</a>
+      <a href="#tpi">新功能与交叉测试</a>
+      <a href="#exploration">探索性测试</a>
+      <a href="#ui-api">UI、可访问性与 API</a>
+      <a href="#verification">缺陷修复验证</a>
+      <a href="#regression">核心流程与兼容性</a>
+      <a href="#sanity">发布产物检查</a>
+      <a href="#release-control">变更控制与周更</a>
+      <a href="#agents">Agent 与人工的边界</a>
+      <a href="#ui-implementation">代码：UI 规划与自愈</a>
+      <a href="#golden-implementation">代码：黄金场景与回归</a>
+      <a href="#endgame-implementation">代码：Endgame 工程实现</a>
+      <a href="#takeaways">关键经验</a>
+      <a href="#references">来源与阅读说明</a>
+    </nav>
+    <div class="rail-note">
+      <p>分析整理 · 2026.10.26</p>
+      <p>从 2026 年 3 月转型经验，追踪到 10 月公开代码实现。代码引用固定到提交版本。</p>
+      <p>单文件 · 无外部依赖 · 可离线阅读</p>
+    </div>
+  </aside>
+  <main class="main" id="main-content">
+    <article class="document">
+      <header id="top">
+        <div class="toolbar">
+          <p class="eyebrow">ENGINEERING STUDY / RELEASE CONFIDENCE</p>
+          <button class="print-button" id="print-button" type="button" hidden>打印 / 保存 PDF</button>
+        </div>
+        <h1><span class="code-title">Endgame</span>不是再跑一遍测试。<br>是建立发布信心。</h1>
+        <p class="lead">详细拆解 VS Code 如何通过交叉测试、探索性验收、缺陷验证与发布产物检查，判断一个版本是否适合交付；结合公开代码，进一步追踪 UI 自动规划与自愈、黄金场景回归和 Endgame 编排的执行链路。</p>
+        <div class="meta"><span>主题：自动化测试与质量管理</span><span>依据：官方博客、源码、Wiki、真实 Issue</span><span>更新日期：2026 年 10 月 26 日</span></div>
+        <blockquote class="thesis">由其他人交叉测试，鼓励超出测试步骤进行探索，并严格控制测试完成后的新增变更。</blockquote>
+        <p class="scope">阅读边界：前半部分整理 2026 年 3 月从月更转周更的经验；新增代码章节以 2026-10-26 的公开提交为基线，不将后续实现倒推为三月已经具备的能力。部分 Wiki 保留旧流程，具体版本计划也不代表永久日程。</p>
+        <div class="note">
+          <p><strong>代码基线：</strong><a href="https://github.com/microsoft/vscode/tree/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f">microsoft/vscode · ff05b50</a>；配套 TPI 校验器来自 <a href="https://github.com/microsoft/vscode-github-triage-actions/tree/5e5f89b56270c343b86cd79cb988698d64bd7908">microsoft/vscode-github-triage-actions · 5e5f89b</a>。</p>
+          <p>直接阅读实现可跳至：<a href="#ui-implementation">UI 规划与自愈</a> · <a href="#golden-implementation">黄金场景与回归</a> · <a href="#endgame-implementation">Endgame 工程实现</a>。</p>
+        </div>
+      </header>
+      <figure class="quality-map">
+        <figcaption>ENDGAME / 一条完整的发布证据链</figcaption>
+        <ol class="map-flow">
+          <li><strong>定义测试范围</strong><span>改了什么 · 哪些环境</span></li>
+          <li><strong>执行交叉验收</strong><span>新功能 · 核心流程</span></li>
+          <li><strong>处置与重新验证</strong><span>修复 · 延期 · 补证据</span></li>
+          <li><strong>确认交付产物</strong><span>RC · 安装包 · 版本组合</span></li>
+          <li><strong>控制发布变更</strong><span>候选修复 · 放行判断</span></li>
+        </ol>
+        <p class="map-note">概念性流程图，不表示所有检查必须严格串行；修复与验证会形成反馈循环。</p>
+      </figure>
+
+      <section class="chapter" id="overview" aria-labelledby="overview-title">
+        <span class="section-tag">SCOPE / 测试范围</span>
+        <h2 id="overview-title">Endgame 到底包含哪些测试？</h2>
+        <p><strong>Endgame 是面向候选版本的一轮集中质量验收，而不是一种单独的测试类型。</strong>它既包含测试活动，也包含缺陷处置、变更收敛和发布准备。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">测试内容</th><th scope="col">核心问题</th><th scope="col">主要对象</th></tr></thead>
+            <tbody>
+              <tr><td>新功能交叉测试</td><td>不熟悉实现的人，能否正确理解和使用功能？</td><td>本版本新增或明显变化的功能</td></tr>
+              <tr><td>缺陷修复验证</td><td>原问题是否真的解决，有没有引入相邻问题？</td><td>已关闭的 Bug、需要验证的改动</td></tr>
+              <tr><td>核心场景回归</td><td>新版本是否破坏用户原本依赖的工作流？</td><td>Golden Scenarios、重构影响区域</td></tr>
+              <tr><td>跨环境与兼容性</td><td>换平台、配置、布局或旧数据后是否仍正常？</td><td>桌面、Web、远程、扩展、历史状态</td></tr>
+              <tr><td>发布产物检查</td><td>实际安装包能否安装、启动和基本使用？</td><td>Stable RC、安装包、Server、CLI</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>与日常 CI 相比，Endgame 更强调真实使用情境和未知问题：CI 主要证明已有断言仍成立；Endgame 还要发现此前没有想到、没有编码成断言的问题。两者互补，不能互相替代。</p>
+        <div class="note"><strong>官方测试观：</strong>不能机械执行指定流程、勾选完成后就结束。测试应当是探索性、开放式的过程。</div>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/wiki/Endgame-testing-and-verification">Endgame testing and verification</a>；下文按不同质量目标重新归类，并非官方唯一分类法。</p>
+      </section>
+
+      <section class="chapter" id="tpi" aria-labelledby="tpi-title">
+        <span class="section-tag">FEATURE VALIDATION / 新功能验收</span>
+        <h2 id="tpi-title">以 Test Plan Item 组织交叉测试</h2>
+        <h3>TPI 是一份可以交给别人的测试任务</h3>
+        <p>VS Code 使用带有 <code>testplan-item</code> 标签的 GitHub Issue，描述 Endgame 需要测试的功能。它不是泛泛的“把这个模块测一下”，而是有边界、可分配的任务。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">组成</th><th scope="col">典型内容</th><th scope="col">目的</th></tr></thead>
+            <tbody>
+              <tr><td>元信息 Header</td><td>关联 Issue、平台、复杂度、作者、必要角色</td><td>支持工具解析与任务分配</td></tr>
+              <tr><td>测试正文 Body</td><td>功能背景、环境准备、步骤与相关说明</td><td>让不熟悉实现的人独立测试</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>平台可指定 macOS、Windows、Linux，也包括 Web、WSL、SSH、Dev Container、iPad 或 <code>anyOS</code>。复杂度标记为 1–5；即使复杂度为 5，官方也要求控制在最多一至两小时，超出范围应拆成多个任务。</p>
+        <h3>为什么不能只由作者自测？</h3>
+        <p>TPI 应当按“测试者对该功能一无所知”的前提编写。通过 <code>Authors</code> 声明参与实现的人，分配工具可避免把测试分给作者；需要特定技能时，也可以预指定测试者或限定角色。</p>
+        <ul>
+          <li><strong>摆脱实现者的预设：</strong>作者知道正确入口，用户不一定知道。</li>
+          <li><strong>暴露说明缺口：</strong>测试者看不懂步骤，可能意味着功能本身不易发现或理解。</li>
+          <li><strong>引入不同习惯：</strong>其他工程师、PM、设计师会走作者没有考虑过的路径。</li>
+        </ul>
+        <div class="case">
+          <h3>真实案例：权限模式不是只测“选择器能切换”</h3>
+          <p><a href="https://github.com/microsoft/vscode/issues/299339">microsoft/vscode#299339</a> 将批准模式、用户设置、企业策略和错误处理组合起来测试：</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">场景</th><th scope="col">测试重点</th></tr></thead>
+              <tbody>
+                <tr><td>Default Approvals</td><td>是否尊重已有设置；关闭全局自动批准后，是否重新请求确认。</td></tr>
+                <tr><td>Bypass Approvals</td><td>是否跳过批准、遇错重试；提问工具是否仍等待用户回答。</td></tr>
+                <tr><td>Autopilot</td><td>是否自动运行工具、回答问题并处理错误。</td></tr>
+                <tr><td>企业策略</td><td>企业禁止全局自动批准时，相关高自主性模式是否不可用。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>测试的是“模式 × 设置 × 策略 × 错误处理”的行为组合。权限工具栏和 Autopilot 自主执行还拆成不同 TPI，避免一个任务失去边界。</p>
+        </div>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/wiki/Writing-Test-Plan-Items">Writing Test Plan Items</a>。</p>
+      </section>
+
+      <section class="chapter" id="exploration" aria-labelledby="exploration-title">
+        <span class="section-tag">EXPLORATION / 主动寻找反例</span>
+        <h2 id="exploration-title">测试步骤是起点，不是边界</h2>
+        <h3>行为是否正确？</h3>
+        <p>先检查功能是否按描述工作，再改变操作顺序、输入无效值、偏离推荐路径，观察它如何失败、恢复和解释错误。正确路径通过，并不能证明失败路径可控。</p>
+        <div class="case">
+          <h3>真实案例：Autopilot 的开放式测试</h3>
+          <p><a href="https://github.com/microsoft/vscode/issues/299338">microsoft/vscode#299338</a> 要求用较复杂的真实项目任务测试，并尝试无法完成的任务、请求中途断网、调整请求次数限制，观察 Agent 是否持续执行、是否过早退出。</p>
+          <p>这类测试关注完整执行过程及异常行为，无法只靠一个固定的成功用例证明正确。</p>
+        </div>
+        <h3>设计是否合理？</h3>
+        <p>官方要求测试者继续追问：设计是否说得通，能否简化，是否与 VS Code 一致，新用户能否理解和发现，会不会损害某种现有工作流。</p>
+        <p><strong>“符合设计”不意味着“设计值得发布”。</strong>一个按需求实现、却让人困惑的功能，同样需要反馈。</p>
+        <h3>是否存在相邻问题？</h3>
+        <p>验证 Bug 时，要尝试原 Issue 之外的相似条件：其他入口是否有同类错误，修复是否只覆盖一种输入，其他配置下是否仍失败，是否破坏了另一条路径。</p>
+        <div class="note">即使不确定某个现象是否算 Bug，也可以提 Issue。发现的问题不必局限于当前 TPI；陌生视角本身就是有价值的质量输入。</div>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/wiki/Endgame-testing-and-verification">Endgame testing and verification</a>。</p>
+      </section>
+
+      <section class="chapter" id="ui-api" aria-labelledby="ui-api-title">
+        <span class="section-tag">COVERAGE / 体验与开发者接口</span>
+        <h2 id="ui-api-title">UI、可访问性和 API 具体测什么？</h2>
+        <h3>UI：默认环境下好看，不等于真实环境中可用</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">维度</th><th scope="col">检查内容</th><th scope="col">典型风险</th></tr></thead>
+            <tbody>
+              <tr><td>键盘操作</td><td>不用鼠标能否导航、完成操作</td><td>焦点丢失、控件无法触达</td></tr>
+              <tr><td>屏幕阅读器</td><td>辅助技术下能否理解和操作</td><td>可见但不可访问</td></tr>
+              <tr><td>缩放级别</td><td>不同缩放下是否正常</td><td>截断、重叠、布局失效</td></tr>
+              <tr><td>配色主题</td><td>尤其检查高对比度主题</td><td>文字不可见、状态难区分</td></tr>
+              <tr><td>尺寸与布局</td><td>窗口、组件大小和工作台布局变化</td><td>依赖固定宽度或默认位置</td></tr>
+              <tr><td>图标与 UI 设置</td><td>更换图标主题、关闭相关界面元素</td><td>依赖某个默认外观表达状态</td></tr>
+              <tr><td>命令与快捷键</td><td>名称清楚、快捷键合理且不冲突</td><td>难发现、与系统或产品快捷键冲突</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>API：不仅能调用，还要容易正确使用</h3>
+        <p>面向扩展开发者的 API，也在 Endgame 验收范围内。重点包括：</p>
+        <ul>
+          <li>初学者是否有足够信息理解 API；JSDoc 是否清楚，链接能否在 IntelliSense 中正确呈现。</li>
+          <li><code>package.json</code> 新配置的悬停文档、补全建议、代码片段是否正确；非法配置是否报错。</li>
+          <li>命名是否与现有接口一致，有没有容易误用的隐含复杂度或陷阱。</li>
+          <li>是否需要过多样板代码；示例扩展和文档是否更新，示例能否构建。</li>
+        </ul>
+        <div class="note"><strong>分析：</strong>API 发布后会带来长期兼容性负担。因此，易理解、易正确使用与运行结果正确，同样是质量的一部分。</div>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/wiki/Endgame-testing-and-verification">官方 UI 与 API 测试基础规范</a>。</p>
+      </section>
+
+      <section class="chapter" id="verification" aria-labelledby="verification-title">
+        <span class="section-tag">VERIFICATION / 修复闭环</span>
+        <h2 id="verification-title">“开发完成”与“验证通过”是两个状态</h2>
+        <p>Endgame 会专门查询已关闭、但尚未验证的 Bug。关闭 Issue 代表提交了修复，不自动等于真实问题已经解决。</p>
+        <div class="flow" aria-label="缺陷验证流程">
+          <span class="step">修复并关闭 Issue</span><span class="arrow" aria-hidden="true">→</span>
+          <span class="step">他人依据步骤验证</span><span class="arrow" aria-hidden="true">→</span>
+          <span class="step">通过 / 验证失败 / 补充步骤</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">标签</th><th scope="col">作用</th></tr></thead>
+            <tbody>
+              <tr><td><code>verification-needed</code></td><td>明确请求验证。</td></tr>
+              <tr><td><code>verified</code></td><td>用于验证流程；规范允许先加标签认领任务，避免重复验证。</td></tr>
+              <tr><td><code>verification-steps-needed</code></td><td>步骤缺失或难以理解，无法验证；移除 verified。</td></tr>
+              <tr><td><code>verification-found</code></td><td>验证时原问题仍存在；移除 verified。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note caution"><strong>标签解读注意：</strong>由于 verified 可能先用于认领，不应完全脱离 Issue 上下文，仅凭标签就断定验证已经完成。</div>
+        <h3>优先验证自己报告、由别人修复的问题</h3>
+        <p>原始报告者通常已经具备复现环境，了解触发条件和预期结果。这不是实现者自验，而是利用报告者的上下文降低验证成本。难复现问题还可以请求社区原作者验证。</p>
+        <h3>晚期修复也必须有验证人</h3>
+        <p>月更计划要求候选修复的 PR 作者寻找验证者，防止“原版本测过，但最后一天加的小修复没有实际验过”。越晚进入版本的变更，越不能依赖旧测试结论。</p>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/wiki/Issue-Tracking">Issue Tracking</a>；<a href="https://github.com/microsoft/vscode/issues/297011">microsoft/vscode#297011 · February 2026 Endgame</a>。</p>
+      </section>
+
+      <section class="chapter" id="regression" aria-labelledby="regression-title">
+        <span class="section-tag">REGRESSION / 保护已有工作流</span>
+        <h2 id="regression-title">验证用户已有的东西不会坏</h2>
+        <h3>Golden Scenarios：长期核心工作流</h3>
+        <p>官方博客将 Golden Scenarios 定义为核心用户流程的预期行为描述。过去，团队在月度 Endgame 手工执行这些场景；转向周更时，开始交给 Agent 做<strong>合并后自动验证</strong>。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">测试资产</th><th scope="col">重点</th><th scope="col">区别</th></tr></thead>
+            <tbody>
+              <tr><td>Test Plan Item</td><td>组织一次明确的测试任务</td><td>可以是新功能探索，也可以针对重构区域检查</td></tr>
+              <tr><td>Golden Scenario</td><td>保护核心用户流程的预期行为</td><td>更适合长期复用，作为持续回归资产</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>二者可以关联，但不能等同。公开博客没有给出完整 Golden Scenarios 清单，也没有说全部场景都是合并前的硬门禁。</p>
+        <h3>历史数据与版本组合：不能只测干净环境</h3>
+        <div class="case">
+          <h3>真实案例：旧聊天会话升级后是否仍可恢复？</h3>
+          <p>2026 年 2 月 Endgame 明确要求：安装新的 Stable VS Code 与 Stable Copilot Chat，验证旧会话仍能无错误显示，并且可以继续使用。</p>
+          <p>它检查的不是“新版本能新建聊天”，而是<strong>已有用户状态能否跨版本继续使用</strong>。</p>
+        </div>
+        <p>计划还包含 VS Code RC、Copilot Chat Stable、Codespaces Web 等组合验证，并提醒：如果核心 RC 因候选修复变化，可能需要在新构建上重新执行相关 Sanity 测试。</p>
+        <div class="note">组件分别通过测试，不等于某个版本组合已经通过测试。构建变化后，也不能自动沿用旧构建的所有验证结论。</div>
+        <p class="source-line">依据：<a href="https://code.visualstudio.com/blogs/2026/03/13/how-VS-Code-Builds-with-AI">How VS Code Builds with AI</a>；<a href="https://github.com/microsoft/vscode/issues/297011">microsoft/vscode#297011</a>。</p>
+      </section>
+
+      <section class="chapter" id="sanity" aria-labelledby="sanity-title">
+        <span class="section-tag">RELEASE SANITY / 最终交付检查</span>
+        <h2 id="sanity-title">最后验收的是实际安装包</h2>
+        <p>Release Sanity 与新功能深度测试不同。它确认用户实际下载到的候选产品可以安装、启动、基本使用，并覆盖 Server 与 CLI 等交付组件。</p>
+        <p>官方基础操作很朴素：安装并启动，打开文件或 About 对话框，点击侧边栏，执行命令，打开终端，安装并使用扩展。这些操作能暴露源码测试发现不了的打包或运行环境问题。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">维度</th><th scope="col">代表内容</th></tr></thead>
+            <tbody>
+              <tr><td>Windows</td><td>System Installer、User Installer、Archive</td></tr>
+              <tr><td>macOS</td><td>架构对应包、Universal 包</td></tr>
+              <tr><td>Linux</td><td>Archive、DEB、RPM、Snap</td></tr>
+              <tr><td>处理器架构</td><td>x64、ARM64，以及适用的 ARM32</td></tr>
+              <tr><td>远程组件</td><td>Server、CLI、不同 Linux 运行环境，包括 Alpine</td></tr>
+              <tr><td>连接链路</td><td>CLI 启动 Tunnel，浏览器连接指定版本 Server</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>远程验证要求明确指定构建 commit，避免无意中测试到另一个版本。测试标识必须足够精确，才能把结果关联到最终交付物。</p>
+        <h3>手工流程与自动化能力并存</h3>
+        <p>Wiki 把 Sanity 描述为发布前的人工最终检查；而 <code>1.111.0</code> 仓库中已经存在自动化 Release Sanity 测试，包括不同平台、安装方式和签名检查能力。</p>
+        <div class="note caution"><strong>覆盖边界：</strong>不能只根据旧 Wiki 判断它全部手工，也不能认定所有平台都完整自动化。当时自动化文档明确，macOS x64 只验证下载，不验证安装与运行。</div>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/wiki/Sanity-Check">Sanity Check</a>；<a href="https://github.com/microsoft/vscode/blob/1.111.0/test/sanity/README.md">1.111.0 Release Sanity 测试说明</a>。</p>
+      </section>
+
+      <section class="chapter" id="release-control" aria-labelledby="release-control-title">
+        <span class="section-tag">CHANGE CONTROL / 让验证结论保持有效</span>
+        <h2 id="release-control-title">测完之后，不能再让版本失控</h2>
+        <h3>月更：先创造稳定的测试窗口</h3>
+        <p>2026 年 2 月的实际计划安排了周一代码冻结、确保各平台构建正常；周二专门测试，除阻塞测试或构建问题外，避免提交修复。随后处理和验证缺陷，临近发布时提高修复审查要求，可延期的问题移出本版本。</p>
+        <p>分支之后，只允许经过讨论和批准的重要候选修复进入。这是在控制“移动靶”：如果被测构建一直变化，就很难把多人的测试结果累积为对同一版本的信心。</p>
+        <h3>周更：压缩日程，并降低临时纳入功能的压力</h3>
+        <p>转型早期的 1.112 Endgame 计划已经压缩为以下节奏：</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">时间</th><th scope="col">安排</th></tr></thead>
+            <tbody>
+              <tr><td>周一上午</td><td>集中测试 TPI、验证 Bug</td></tr>
+              <tr><td>周一下午至周二</td><td>修复必要问题，默认倾向将非必要问题延期</td></tr>
+              <tr><td>周二</td><td>构建、内部发布及发布准备</td></tr>
+              <tr><td>周三</td><td>讨论新增候选问题，启动发布</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note"><strong>关键规则：</strong>若发现测试阻塞，建议把功能推迟到下一迭代。周更缩短了等待下次发布的时间，因此不必为了赶本次发布而冒险塞入未验证功能。</div>
+        <p>Endgame Champion 负责创建和跟进计划，协调测试人力、构建可用性、验证、候选修复、Sanity 与发布；并可根据缺陷、假期等调整日程。质量问题可以改变发布时间，而不是测试无条件服从原定日期。</p>
+        <p class="source-line">依据：<a href="https://github.com/microsoft/vscode/issues/297011">月更计划 microsoft/vscode#297011</a>；<a href="https://github.com/microsoft/vscode/issues/300702">周更早期计划 microsoft/vscode#300702</a>；<a href="https://github.com/microsoft/vscode/wiki/Running-the-Endgame">Running the Endgame</a>。日程是具体版本实例，不是永久固定规则。</p>
+      </section>
+
+      <section class="chapter" id="agents" aria-labelledby="agents-title">
+        <span class="section-tag">MARCH 2026 / 博客中的人机分工</span>
+        <h2 id="agents-title">哪些交给 Agent，哪些仍需要人？</h2>
+        <p>以下状态描述以 2026 年 3 月博客发表时为准。博客描述了一种自定义验收 Agent：使用 Playwright MCP 启动 VS Code、导航到功能、操作并截图，评估结果是否符合预期；发现问题后在循环中继续修复，保留截图供人审查。10 月代码中已经可见的执行器与证据能力，在后续章节单独分析。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">工作</th><th scope="col">博客中的做法与状态</th></tr></thead>
+            <tbody>
+              <tr><td>核心用户流程</td><td>开始把 Golden Scenarios 交给 Agent 做合并后验证。</td></tr>
+              <tr><td>产品操作与截图</td><td>已构建 Playwright MCP 驱动的自动验收能力。</td></tr>
+              <tr><td>发现问题后的修复</td><td>可在 Agent 循环内修改并再次验证。</td></tr>
+              <tr><td>证据审查</td><td>截图保存给人审查，不只依赖“已完成”的文字报告。</td></tr>
+              <tr><td>跨角色交叉测试</td><td>工程师、PM、设计师继续参与，但压缩执行时间。</td></tr>
+              <tr><td>架构与体验取舍</td><td>人继续判断，工程师对结果负责。</td></tr>
+              <tr><td>定性体验评分</td><td>Taste-based grading 仍处于作者探索阶段。</td></tr>
+              <tr><td>演示录像、文档一致性</td><td>自动生成录像和检查文档与产品体验的偏差，属于探索方向。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>质量不能等于 Agent 的自我声明</h3>
+        <p>“步骤执行成功”并不等于“测试充分”。官方 Endgame 要求测试者怀疑步骤是否遗漏重要情形；自动化验收同样需要明确预期、可审查证据和人工判断。</p>
+        <p>配套代码审查采用 Copilot Review 先行、工程师处理评论后再请求人工审查的工作方式。但它是整个质量体系的一部分，不应与 Endgame 测试混为同一种检查。</p>
+        <div class="note caution"><strong>证据边界：</strong>公开文章未披露完整提示词、验收判定阈值、误判率或全部场景清单，也没有证明周更后的缺陷率下降。不能据此声称人工测试已被替代。</div>
+        <p class="source-line">依据：<a href="https://code.visualstudio.com/blogs/2026/03/13/how-VS-Code-Builds-with-AI">How VS Code Builds with AI · Keeping Quality High as Velocity Increases</a>。</p>
+      </section>
+
+      <section class="chapter" id="ui-implementation" aria-labelledby="ui-implementation-title">
+        <span class="section-tag">CODE STUDY / UI 自动规划与自愈</span>
+        <h2 id="ui-implementation-title">Agent 规划，执行器运行，证据支撑判断</h2>
+        <p><strong>UI 自动验证不是让模型自由浏览后宣称“没有问题”，而是将规划、执行、判定与证据采集分层。</strong>外层 Agent 从 Issue 或 PR 提炼预期行为，生成可执行场景；底层测试框架负责启动产品、执行步骤并记录结果。</p>
+        <h3>公开代码入口</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">入口文件</th><th scope="col">职责</th></tr></thead>
+            <tbody>
+              <tr><td><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.github/skills/validate-ui-scenario/SKILL.md"><code>validate-ui-scenario/SKILL.md</code></a></td><td>指导 Agent 从 Issue 编写场景、选择构建、运行并报告。</td></tr>
+              <tr><td><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/runScenario.ts"><code>test/scenario/src/runScenario.ts</code></a></td><td>定义场景接口，加载校验，逐步执行和结果处理。</td></tr>
+              <tr><td><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/application.ts"><code>test/scenario/src/application.ts</code></a></td><td>选择实际产品、启动 VS Code、隔离用户环境。</td></tr>
+              <tr><td><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/evidence.ts"><code>test/scenario/src/evidence.ts</code></a></td><td>采集截图、视频、Trace，生成清单与 HTML 报告。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>自动规划：先明确可观察主张，再生成步骤</h3>
+        <p>操作规范中的例子是：在设置中搜索 <code>chat confirm</code>，应当找到说明文字中包含相关信息的 <code>Max Requests</code>。Agent 需要把问题拆成环境、操作、预期和失败判据，而不是只生成点击序列。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">规划工作</th><th scope="col">为什么需要</th></tr></thead>
+            <tbody>
+              <tr><td>基线检查</td><td>先确认用 max requests 能找到目标设置，排除“构建中根本没有该设置”的原因。</td></tr>
+              <tr><td>界面机制分析</td><td>设置列表是虚拟化的；需要滚动收集结果，不能因当前 DOM 没有目标就判定不存在。</td></tr>
+              <tr><td>独立验证信号</td><td>根据结果文本、DOM、焦点或可访问性状态判断；操作返回成功不等于业务结果正确。</td></tr>
+              <tr><td>执行边界</td><td>提前识别登录、硬件、主观判断或框架缺失的能力，并明确报告。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>场景格式与执行链路</h3>
+        <p>场景由 JavaScript 文件导出。下面是对接口的结构化简写，不是完整可运行脚本：</p>
+        <pre class="code-block"><code>Scenario
+  id, title                 场景身份
+  source                    关联 Issue / TPI
+  scenarioPath              可选的 Markdown 定义路径
+  workspacePath             一次性测试工作区
+  userSettings              初始化设置
+  extraArgs, extraEnv       启动参数与环境
+  stepPauseMs               录像中步骤停留时间
+  steps[]
+    id, title
+    run(context)            执行操作与断言
+
+context = { app, workbench, code, page, skip }</code></pre>
+        <p><code>scenarioPath</code> 用于记录关联定义；执行器实际加载的是 JavaScript 场景，不能说它已经实现了通用的 Markdown 自动解释执行。</p>
+        <p><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/automation/src/workbench.ts#L32-L75"><code>Workbench</code></a> 已封装 quickaccess、editors、settingsEditor、terminal、chat 等功能助手。场景优先使用这些助手，必要时再直接操作 Playwright Page。</p>
+        <pre class="code-block"><code>Issue / 功能预期
+  → Agent 编写 scenario.cjs
+  → runScenario()
+  → Workbench 助手 / Playwright Page
+  → 真实 VS Code
+  → 断言 + 截图 + Trace + 报告</code></pre>
+        <h3>版本与隔离：别在错误的产品上证明修复有效</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">运行目标</th><th scope="col">用途</th></tr></thead>
+            <tbody>
+              <tr><td>默认已安装 Insiders，否则 Stable</td><td>复现已发布产品中的行为。</td></tr>
+              <tr><td><code>--dev</code></td><td>验证当前源码中的未合并修改，必须保证构建输出已更新。</td></tr>
+              <tr><td><code>--build &lt;path&gt;</code></td><td>针对明确的产品安装包运行。</td></tr>
+              <tr><td><code>--web --headless</code></td><td>验证 Web 场景。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><code>application.ts</code> 准备隔离的用户数据和扩展目录，并拒绝通过额外参数覆盖隔离目录。这样可以减少用户真实设置、扩展和运行状态的干扰。用已安装产品运行成功，不能证明未合并代码已修复问题。</p>
+        <h3>如何判定通过、失败与无法验证？</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">步骤行为</th><th scope="col">执行器结果</th></tr></thead>
+            <tbody>
+              <tr><td><code>run()</code> 正常返回</td><td>步骤记为 passed；返回文字写入报告。</td></tr>
+              <tr><td>抛出异常</td><td>步骤失败，停止整个场景。</td></tr>
+              <tr><td><code>skip(reason, { needs })</code></td><td>记录跳过，整个场景为 aborted，不算通过。</td></tr>
+              <tr><td><code>needs: human</code></td><td>需要人完成，例如物理设备、主观判断或无法脚本化的登录。</td></tr>
+              <tr><td><code>needs: infrastructure</code></td><td>理论上可自动化，但当前框架缺能力，应作为能力缺口报告。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>失败后停止，避免在异常状态下继续操作并制造连带噪声。但执行器并不自动证明断言充分：如果步骤只点击、不检查结果，也可能正常返回。因此规范要求用独立信号验证，截图支持主张，不能单独建立正确性。</p>
+        <h3>“自愈”属于外层 Agent，不属于 Playwright</h3>
+        <pre class="code-block"><code>外层 Agent：规划 → 编写场景 → 运行 → 分析失败
+                                      ↓
+                                  修改产品实现
+                                      ↓
+                                  重新构建、重跑
+
+内部执行器：加载 → 逐步执行 → 留证 → 遇错停止</code></pre>
+        <p><code>runScenario.ts</code> 不调用模型修改产品代码。<code>evidence.ts</code> 中截图失败后的有限重试属于采集容错，不是代码自愈。博客中的修复循环，需要外层 Agent 读取结果并执行修改。</p>
+        <div class="note"><strong>可信验证要求：</strong>有条件时先记录修复前的失败；不可为了得到通过结果而削弱断言；无法执行的步骤必须报告。修复产品与修复测试实现都可以，但不能修改预期来掩盖回归。</div>
+        <h3>执行结果如何留下证据？</h3>
+        <p><code>EvidenceService</code> 输出逐步结果报告、<code>manifest.json</code>、步骤截图、原始录像、带说明的视频以及 Trace 和日志。完成阶段还会阻止将已失败步骤的运行标记为成功，并处理应用提前关闭等情况。</p>
+        <p>证据保存在 <code>.build/vscode-playwright-mcp/evidence/&lt;run-id&gt;/</code>。缺少 ffmpeg 或 ffprobe 时会警告并保留原始视频，不会因此停止场景；带说明的视频不是无条件产出。清单中的 commit 来自 CI 环境变量，也不能自动当作任意本地被测安装包的身份校验。</p>
+        <p>Skill 中的本地执行入口为：</p>
+        <pre class="code-block"><code>npm --prefix test/scenario run compile
+node test/scenario/out/runScenario.js &lt;scenario.cjs&gt; --dev</code></pre>
+        <p>以上命令需要完整的 VS Code 源码构建环境；这里只展示公开入口，并未在本次分析中运行 VS Code 测试。</p>
+        <div class="note caution"><strong>不可公开核实的部分：</strong>Skill 说明，PR 加上 <code>~requires-ui-validation</code> 后，由 <code>microsoft/vscode-engineering</code> 研究改动、针对准确的合并候选运行场景并回贴结果。该仓库本次公开访问返回 404，内部规划提示词、修复次数上限及完整编排逻辑无法核实；不能据此编造实现。</div>
+        <p class="source-line">关键代码：<a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/runScenario.ts#L158-L235">runScenario 执行循环</a>；<a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/evidence.ts#L281-L365">EvidenceService 完成与结果保护</a>。</p>
+      </section>
+
+      <section class="chapter" id="golden-implementation" aria-labelledby="golden-implementation-title">
+        <span class="section-tag">CODE STUDY / 黄金场景与持续回归</span>
+        <h2 id="golden-implementation-title">核心用户行为，如何变成可重复测试？</h2>
+        <h3>先区分三种不同资产</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">概念</th><th scope="col">含义与用途</th></tr></thead>
+            <tbody>
+              <tr><td>Golden Scenario</td><td>核心用户工作流及其预期行为，定义必须保持的产品能力。</td></tr>
+              <tr><td>Golden Screenshot</td><td>图片基线与视觉差异，用于检查外观；不是完整用户流程。</td></tr>
+              <tr><td>Smoke Test</td><td>可重复执行的关键端到端测试，可作为持续回归实现。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note caution"><strong>公开证据边界：</strong>本次未在核实的公开入口找到博客那套完整 Golden Scenarios 目录。下述 Smoke 用例展示的是核心行为的实际代码化方式，不能宣称每个用例都与博客中的黄金场景逐一对应。</div>
+        <h3>定义场景需要什么？</h3>
+        <p>结合博客与公开接口，可将场景整理为：初始状态、操作路径、预期结果、环境条件、失败判据和证据。例如“编辑并保存后重启，内容仍存在”。这是工程分析提炼，不是一个已核实的官方统一 YAML Schema。</p>
+        <h3>真实代码：文件保存、Hot Exit 与跨版本恢复</h3>
+        <p><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/smoke/src/areas/workbench/data-loss.test.ts"><code>data-loss.test.ts</code></a> 包含编辑器恢复、文件保存后恢复、未保存文件的 Hot Exit、自动保存，以及 Stable → Insiders 迁移等测试。</p>
+        <pre class="code-block"><code>打开 app.js → 输入文本 → 检查 dirty 状态
+  → 保存 → 检查 dirty 状态消失
+  → 重启 VS Code → 断言文件仍包含输入内容</code></pre>
+        <p>验证不是“保存命令没有报错”，而是重启后用户内容仍存在。对于跨版本恢复，用旧 Stable 创建状态，停止旧版本，再用<strong>同一测试用户数据目录</strong>启动新版本并验证。两个版本分别在干净目录启动，不能证明迁移兼容。</p>
+        <p>覆盖也有条件：没有可用旧版构建时，部分迁移测试会跳过；代码中还存在特定环境的隔离或跳过条件。测试文件存在不等于每次在所有环境都执行。</p>
+        <h3>真实代码：搜索结果的确定性检查</h3>
+        <p><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/smoke/src/areas/search/search.test.ts#L36-L63"><code>search.test.ts</code></a> 在测试工作区搜索 <code>body</code>，断言 <code>6 results in 3 files</code>；限定 <code>*.js</code> 后断言 <code>4 results in 1 file</code>；移除文件匹配后继续检查数量变化。</p>
+        <p>测试工作区由 <a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/smoke/src/main.ts"><code>test/smoke/src/main.ts</code></a> 准备，默认来自 <code>microsoft/vscode-smoketest-express</code>。这里的可靠性来自可控输入、明确操作和结果断言，而不是模型主观评价“搜索看起来正常”。</p>
+        <h3>一次性验证如何与长期回归分工？</h3>
+        <p><code>validate-ui-scenario</code> 规范明确：从 Issue 派生的一次性验证使用 Scenario；希望每次构建执行的确定性回归，应编写 Smoke Test。</p>
+        <pre class="code-block"><code>新问题 / 新功能
+  → Agent 编写一次性场景，快速复现并留证
+  → 识别长期重要、可以稳定重复的行为
+  → 实现为 Smoke 测试，纳入持续回归</code></pre>
+        <p>这是由公开分工推导出的合理演进路径，不代表仓库已经存在自动把 Scenario 转成 Smoke 的转换流水线。</p>
+        <h3>回归如何进入 CI？</h3>
+        <p>当前 <a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.github/workflows/pr.yml"><code>.github/workflows/pr.yml</code></a> 包含变更影响检测、多平台测试、Electron Smoke 分片和统一的 PR Gate。汇总任务检查依赖任务结果，失败或取消等结果会使 Gate 失败，合理的选择性跳过允许通过。</p>
+        <div class="note caution"><strong>不能混同两个时间点：</strong>博客提到的黄金场景 Agent 验证是合并后；当前 Smoke 工作流运行在 PR 阶段。工作流生成 Gate 检查，也不等于仅凭 YAML 就能证明分支保护禁止绕过。</div>
+        <p>本地 Smoke 入口示例：</p>
+        <pre class="code-block"><code>npm run smoketest -- -g "Data Loss" --tracing
+npm run smoketest-no-compile -- --build &lt;产品路径&gt; --tracing</code></pre>
+        <p class="source-line">关键依据：<a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.github/skills/smoke-tests/SKILL.md">Smoke 测试操作规范</a>；<a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.github/workflows/pr.yml#L885-L939">PR Gate 汇总代码</a>。</p>
+      </section>
+
+      <section class="chapter" id="endgame-implementation" aria-labelledby="endgame-implementation-title">
+        <span class="section-tag">CODE STUDY / Endgame 工程实现</span>
+        <h2 id="endgame-implementation-title">结构化测试任务，加上版本级质量收敛</h2>
+        <p>Endgame 没有一个覆盖全部过程的 <code>endgame.test.ts</code>。它由 Milestone、发布计划 Issue、TPI、验证标签、候选构建和 Sanity 流水线共同表达。</p>
+        <h3>TPI 是可解析的 Markdown，而不只是文档</h3>
+        <pre class="code-block"><code>Refs: 关联 Issue
+
+- [ ] windows
+- [ ] linux
+
+Complexity: 3
+Authors: @作者
+Roles: Developer
+
+---
+
+背景、环境准备、测试步骤与预期行为</code></pre>
+        <p>配套公开仓库的 <a href="https://github.com/microsoft/vscode-github-triage-actions/blob/5e5f89b56270c343b86cd79cb988698d64bd7908/test-plan-item-validator/validator.ts"><code>test-plan-item-validator/validator.ts</code></a> 提供真实解析实现。<code>parseTestPlanItem()</code> 提取分隔线前的 Header、Issue 引用、平台名额、作者和角色；复杂度缺省为 3，范围必须为 1–5，并要求至少一个平台名额。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">实现细节</th><th scope="col">含义与边界</th></tr></thead>
+            <tbody>
+              <tr><td>合并 Issue 创建者与 Authors</td><td>保留作者集合，供分配工具避免作者自验。</td></tr>
+              <tr><td>勾选与测试人同时存在</td><td>解析为完成状态需要同时有勾选和用户，不能只有一个孤立勾选。</td></tr>
+              <tr><td>通用平台名额归一化</td><td>anyOS 等名额倾向归到当前名额较少的平台类别。</td></tr>
+              <tr><td>不等于完整人员调度器</td><td>这段代码证明格式解析和平台名额处理，不能据此宣称已掌握随机人员分配或全团队负载均衡算法。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>测试计划本身也被校验</h3>
+        <p><a href="https://github.com/microsoft/vscode-github-triage-actions/blob/5e5f89b56270c343b86cd79cb988698d64bd7908/test-plan-item-validator/TestPlanitemValidator.ts"><code>TestPlanitemValidator.ts</code></a> 根据配置，对错误 TPI 留下错误说明并切换无效标签；修好后清理错误状态；为关联 Issue 增加纳入测试计划的标签，并在可能时补充当前 Milestone。</p>
+        <p>对应的 <a href="https://github.com/microsoft/vscode-github-triage-actions/blob/5e5f89b56270c343b86cd79cb988698d64bd7908/test-plan-item-validator/TestPlanItemValidator.test.ts">单元测试</a> 覆盖无效格式提示、重复运行不堆积评论、修正后恢复状态等行为。它保证计划可以被工具处理，但不能自动证明测试内容充分。</p>
+        <div class="note caution"><strong>部署边界：</strong>这些代码证明配套仓库存在相关实现；本次未核实它目前在所有 VS Code 流程中的实际启用配置。</div>
+        <h3>真实 TPI：同时检查应发生与不应发生的行为</h3>
+        <div class="case">
+          <h3>Custom agent hooks · microsoft/vscode#299341</h3>
+          <p><a href="https://github.com/microsoft/vscode/issues/299341">该测试任务</a> 指定 Linux 与多个 anyOS 名额，复杂度为 3。测试者开启功能设置、创建自定义 Agent、配置 Hooks，检查提示与补全，并结合日志观察输入输出。</p>
+          <p>关键判据是：只有选中该 Agent 或通过 <code>runSubagent</code> 调用时 Hook 才触发，其他情况下不应触发。它是带负向约束的产品行为验证，而不仅是操作录像。</p>
+        </div>
+        <p>TPI 可以由人执行，也可以使用 Scenario 框架自动执行其中可自动化部分；公开证据不足以说明每个 TPI 都已经自动转为脚本。</p>
+        <h3>如何发现漏测与晚期修复？</h3>
+        <p>仓库中的 <a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.vscode/notebooks/endgame.github-issues"><code>.vscode/notebooks/endgame.github-issues</code></a> 是 GitHub 查询集合，而非产品测试程序。它汇总：</p>
+        <ul>
+          <li>当前 Milestone 仍开放的普通 Issue 和 PR。</li>
+          <li>缺少验证步骤的问题，以及未完成的 TPI。</li>
+          <li>TPI 工具运行后新建并修复、但尚未验证的 Bug。</li>
+        </ul>
+        <p>最后一项很关键：测试计划生成以后发生的新修复，不能从版本质量视野中消失。Notebook 把“纳入版本 → 纳入计划或单独验证 → 修复 → 补验”变成可查询的状态。</p>
+        <h3>当前周更计划如何编排？</h3>
+        <p><a href="https://github.com/microsoft/vscode/issues/342482">1.143.0 Endgame · microsoft/vscode#342482</a> 展示了后续周更实践：开始前创建 TPI、补验证步骤与人力；将需验证的 Bug 分组生成 TPI；周一集中测试；只修复必要问题并倾向延期；包括晚期修复在内的改动都要验证；内部发布后再分阶段推送 Stable。</p>
+        <p>计划还链接 <code>vscode-engineering</code> 的 <code>start-endgame.yml</code>，记录自动创建的版本更新 PR 与 Notebook Milestone 更新 PR。这证明部分准备动作已自动化；内部工作流本身不可公开读取，不能进一步推测其全部实现。</p>
+        <h3>最终候选构建如何进入 Sanity？</h3>
+        <p>当前 <a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/build/azure-pipelines/product-sanity-tests.yml"><code>product-sanity-tests.yml</code></a> 使用 <code>buildCommit</code> 与 <code>buildQuality</code> 指定被测版本；<a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/build/azure-pipelines/common/sanity-tests.yml">公共 Sanity 模板</a> 支持从流水线产物获取尚未通过更新服务分发的包，执行平台相关检查并输出测试结果、截图和崩溃诊断。</p>
+        <div class="note caution"><strong>不是所有检查都是硬门禁：</strong>公共 Sanity 模板的 <code>continueOnError</code> 默认值是 true，调用方可以覆盖。测试存在不代表任何失败都会自动阻止发布，必须结合具体调用与审批判断。</div>
+        <h3>三类实践的连接与边界</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">维度</th><th scope="col">UI 场景验证</th><th scope="col">黄金场景 / 持续回归</th><th scope="col">Endgame</th></tr></thead>
+            <tbody>
+              <tr><td>主要输入</td><td>Issue、PR、功能预期</td><td>核心用户流程规格</td><td>本版本范围、TPI、待验证修复</td></tr>
+              <tr><td>主要目标</td><td>证明某项改动符合预期</td><td>保护核心能力持续成立</td><td>判断整个版本是否适合交付</td></tr>
+              <tr><td>执行者</td><td>Agent + Scenario Runner</td><td>Agent 或确定性 Smoke 测试</td><td>跨角色人员与自动化工具</td></tr>
+              <tr><td>主要输出</td><td>逐步结果与证据包</td><td>回归结果、CI 状态</td><td>已验证范围、剩余风险与发布决定</td></tr>
+              <tr><td>失败处置</td><td>外层 Agent 修改后重跑</td><td>调查失败、修复并回归</td><td>控制候选修复、补验或延期</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Agent 负责理解与规划，测试框架负责可靠执行和留证，Endgame 负责版本范围与发布风险。</strong>这三个职责相互连接，但不能混为一种“全自动测试”。</p>
+      </section>
+
+      <section class="chapter conclusion" id="takeaways" aria-labelledby="takeaways-title">
+        <span class="section-tag">TAKEAWAYS / 可借鉴的质量机制</span>
+        <h2 id="takeaways-title">把测试组织成一条证据链</h2>
+        <ul>
+          <li><strong>有范围：</strong>每项重要变化对应明确的测试任务、环境和验证方式。</li>
+          <li><strong>有独立视角：</strong>交叉测试减少实现者盲点，步骤之外继续探索。</li>
+          <li><strong>有真实产品：</strong>既检查代码行为，也检查运行体验、旧数据和最终安装包。</li>
+          <li><strong>有反馈闭环：</strong>修复、失败、缺少步骤和延期均有可追踪状态。</li>
+          <li><strong>有变更边界：</strong>晚期修复受控，构建变化后重新判断验证是否仍有效。</li>
+          <li><strong>有最终责任：</strong>Agent 执行重复工作，人判断风险并对结果负责。</li>
+        </ul>
+        <p>Endgame 真正管理的是：某项改动由谁在什么环境中验证，发现的问题如何处置，最后发布的构建是否仍对应这些验证结论。周更压缩的是等待和重复劳动，不应压缩这条证据链。</p>
+      </section>
+
+      <section class="chapter" id="references" aria-labelledby="references-title">
+        <span class="section-tag">REFERENCES / 可追溯来源</span>
+        <h2 id="references-title">来源与阅读说明</h2>
+        <p>本文是基于官方资料与公开代码的分析整理，不是官方文档译文。案例来自真实 Issue；概念分类与经验提炼为综合分析。三月博客、历史 Wiki 和十月代码分别标记，避免时间混用。源码链接固定提交，Wiki 和 Issue 仍可能持续编辑。文中命令是入口说明，本次未实际运行 VS Code 测试。</p>
+        <h3>官方经验与历史流程</h3>
+        <ol class="sources-list">
+          <li><a href="https://code.visualstudio.com/blogs/2026/03/13/how-VS-Code-Builds-with-AI">How VS Code Builds with AI</a><span>2026-03-13；月更转周更、Agent 验收、Golden Scenarios、人机分工。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/wiki/Endgame-testing-and-verification">Endgame testing and verification</a><span>测试哲学、探索性测试、UI 与 API 检查内容。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/wiki/Writing-Test-Plan-Items">Writing Test Plan Items</a><span>TPI 格式、平台、复杂度、作者排除与任务分配。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/wiki/Issue-Tracking">Issue Tracking</a><span>验证标签、缺陷验证与原报告者验证机制。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/wiki/Sanity-Check">Sanity Check</a><span>客户端、安装包、Server 与 CLI 的最终检查。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/wiki/Running-the-Endgame">Running the Endgame</a><span>Endgame Champion 职责、计划协调与恢复发布。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/issues/297011">microsoft/vscode#297011 · February 2026 Endgame</a><span>月更时期真实日程、候选修复、版本组合与旧会话验证。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/issues/300702">microsoft/vscode#300702 · 1.112.0 Endgame</a><span>周更转型早期的压缩日程和默认延期原则；不是后续所有版本的固定规则。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/issues/299339">microsoft/vscode#299339 · Approvals 与工具栏测试</a><span>批准模式、设置、企业策略和错误处理的组合测试。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/issues/299338">microsoft/vscode#299338 · Autopilot 测试</a><span>长任务、失败路径、断网与请求次数相关行为。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/1.111.0/test/sanity/README.md">1.111.0 Release Sanity 测试说明</a><span>固定版本的自动化能力、矩阵与覆盖限制。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/wiki/Development-Process">Development Process</a><span>历史月更流程与 Definition of Done；页面保留旧节奏描述，需结合后续公告理解。</span></li>
+        </ol>
+        <h3>公开代码与后续工程实现</h3>
+        <ol class="sources-list">
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.github/skills/validate-ui-scenario/SKILL.md">validate-ui-scenario · Agent 操作规范</a><span>场景规划、构建选择、可信断言、阻塞分类及 PR 自动验证的公开说明。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/runScenario.ts">runScenario.ts</a><span>场景接口、加载校验、逐步执行、失败或中止处理。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/application.ts">application.ts</a><span>实际产品选择、隔离目录与启动设置。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/scenario/src/evidence.ts">evidence.ts</a><span>截图、录像、Trace、执行清单、报告与结果保护。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/automation/src/workbench.ts">workbench.ts</a><span>编辑器、设置、终端、聊天等可复用功能助手。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/smoke/src/areas/workbench/data-loss.test.ts">data-loss.test.ts</a><span>保存、Hot Exit、编辑器恢复和旧版到新版迁移。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/smoke/src/areas/search/search.test.ts">search.test.ts</a><span>搜索结果数量、过滤与匹配操作的确定性断言。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/test/smoke/src/main.ts">Smoke main.ts</a><span>测试工作区、运行环境、套件注册与条件执行。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.github/workflows/pr.yml">PR 工作流与 PR Gate</a><span>变更检测、多平台、Smoke 分片和结果汇总。</span></li>
+          <li><a href="https://github.com/microsoft/vscode-github-triage-actions/blob/5e5f89b56270c343b86cd79cb988698d64bd7908/test-plan-item-validator/validator.ts">TPI validator.ts</a><span>配套仓库中的 Markdown 解析、复杂度、平台和作者处理。</span></li>
+          <li><a href="https://github.com/microsoft/vscode-github-triage-actions/blob/5e5f89b56270c343b86cd79cb988698d64bd7908/test-plan-item-validator/TestPlanitemValidator.ts">TestPlanitemValidator.ts</a><span>格式错误反馈、标签恢复、关联 Issue 与 Milestone 处理。</span></li>
+          <li><a href="https://github.com/microsoft/vscode-github-triage-actions/blob/5e5f89b56270c343b86cd79cb988698d64bd7908/test-plan-item-validator/TestPlanItemValidator.test.ts">TPI 校验器单元测试</a><span>无效格式、重复反馈清理和修复后状态恢复。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/.vscode/notebooks/endgame.github-issues">Endgame GitHub Issues Notebook</a><span>开放任务、缺少验证步骤与晚期修复的查询看板。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/issues/299341">microsoft/vscode#299341 · Custom agent hooks</a><span>含正向与负向约束的真实 TPI。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/issues/342482">microsoft/vscode#342482 · 1.143.0 Endgame</a><span>十月周更计划、分组验证、自动准备动作与分阶段推送。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/build/azure-pipelines/product-sanity-tests.yml">当前 product-sanity-tests.yml</a><span>以 buildCommit、buildQuality 指定版本的多平台验证。</span></li>
+          <li><a href="https://github.com/microsoft/vscode/blob/ff05b50d4efafeaa0c1e025b13b7c1c5b196bc9f/build/azure-pipelines/common/sanity-tests.yml">公共 sanity-tests.yml</a><span>构建产物输入、平台执行、诊断输出与 continueOnError 默认值。</span></li>
+        </ol>
+        <div class="note caution"><strong>未能公开核实：</strong><code>microsoft/vscode-engineering</code> 内部工作流、完整黄金场景目录、自动规划提示词和自愈循环上限。文中只引用公开规范对这些能力的说明，不将其当作已读过的源码。</div>
+      </section>
+      <footer class="footer">
+        <span>VS Code Endgame · 测试内容与质量管理经验分析 · 2026.10.26</span>
+        <a href="#top">返回顶部 ↑</a>
+      </footer>
+    </article>
+  </main>
+  <script>
+    (() => {
+      const printButton = document.getElementById('print-button');
+      printButton.hidden = false;
+      printButton.addEventListener('click', () => window.print());
+      const progress = document.getElementById('reading-progress');
+      const links = Array.from(document.querySelectorAll('.toc a'));
+      const sections = links.map(link => document.querySelector(link.getAttribute('href')));
+      let scheduled = false;
+      const update = () => {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+        progress.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+        let activeIndex = 0;
+        sections.forEach((section, index) => {
+          if (section.getBoundingClientRect().top <= 150) activeIndex = index;
+        });
+        if (maxScroll > 0 && window.scrollY >= maxScroll - 2) activeIndex = links.length - 1;
+        links.forEach((link, index) => {
+          if (index === activeIndex) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+        scheduled = false;
+      };
+      const scheduleUpdate = () => {
+        if (!scheduled) {
+          scheduled = true;
+          requestAnimationFrame(update);
+        }
+      };
+      window.addEventListener('scroll', scheduleUpdate, { passive: true });
+      window.addEventListener('resize', scheduleUpdate);
+      update();
+    })();
+  </script>
+</body>
+</html>
