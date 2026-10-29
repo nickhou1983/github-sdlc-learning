@@ -1,0 +1,2551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Universe 2026 核心发布深度解读 — 全景功能手册 (Nordic Air)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(0.985);
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+    transition:
+        opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.45s;
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+/* ===========================================
+   NORDIC AIR THEME (EXECUTIVE READABLE DESIGN)
+   =========================================== */
+:root {
+    --stage-bg: #0B1120;
+    --slide-bg: #F4F6F9;
+    --surface: #FFFFFF;
+    --surface-subtle: #F8FAFC;
+    --navy: #0F172A;
+    --navy-light: #1E293B;
+    --slate: #334155;
+    --muted: #64748B;
+    --sky: #0284C7;
+    --sky-soft: #E0F2FE;
+    --teal: #0D9488;
+    --teal-soft: #CCFBF1;
+    --amber: #D97706;
+    --amber-soft: #FEF3C7;
+    --border: #E2E8F0;
+    --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 14px 34px rgba(15, 23, 42, 0.06);
+    --font-display: 'Outfit', 'Noto Sans SC', sans-serif;
+    --font-sans: 'Noto Sans SC', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ===========================================
+   PAGE SHELL & HEADER / FOOTER SYSTEM
+   =========================================== */
+@keyframes ambientDrift {
+    0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(24px, -16px, 0) scale(1.06);
+    }
+}
+
+.nordic-wrap {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    padding: 48px 84px 68px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 1;
+}
+
+.nordic-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -120px;
+    background:
+        radial-gradient(circle at 14% 18%, rgba(2, 132, 199, 0.065) 0%, transparent 38%),
+        radial-gradient(circle at 86% 82%, rgba(13, 148, 136, 0.065) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+    animation: ambientDrift 14s ease-in-out infinite;
+}
+
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 18px;
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    font-weight: 600;
+    background: var(--sky-soft);
+    color: var(--sky);
+    letter-spacing: 0.03em;
+}
+
+.badge-teal {
+    background: var(--teal-soft);
+    color: var(--teal);
+}
+
+.badge-amber {
+    background: var(--amber-soft);
+    color: var(--amber);
+}
+
+.badge-navy {
+    background: var(--navy);
+    color: #FFFFFF;
+}
+
+.page-indicator {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 7px 18px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+}
+
+/* ===========================================
+   SLIDE HEADLINE & SUMMARY BANNER
+   =========================================== */
+.title-section {
+    display: grid;
+    grid-template-columns: 1080px 1fr;
+    gap: 40px;
+    align-items: end;
+}
+
+.slide-title {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--navy);
+    letter-spacing: -0.015em;
+}
+
+.slide-title span {
+    color: var(--sky);
+}
+
+.slide-subtitle {
+    font-size: 18.5px;
+    line-height: 1.58;
+    color: var(--slate);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 15px 22px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===========================================
+   FLOATING CARDS & SCANNABLE PILL ITEMS
+   =========================================== */
+.hero-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 44px;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 42px rgba(15, 23, 42, 0.09);
+}
+
+.float-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 30px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.32s ease;
+}
+
+.float-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(2, 132, 199, 0.10);
+    border-color: rgba(2, 132, 199, 0.38);
+}
+
+.float-card.navy-card {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #FFFFFF;
+    box-shadow: var(--shadow-md);
+}
+
+.float-card.navy-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 44px rgba(15, 23, 42, 0.28);
+    border-color: rgba(56, 189, 248, 0.55);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--sky-soft);
+    color: var(--sky);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.float-card:hover .step-num {
+    transform: scale(1.1) rotate(-4deg);
+}
+
+.step-num.teal {
+    background: var(--teal-soft);
+    color: var(--teal);
+}
+
+.step-num.amber {
+    background: var(--amber-soft);
+    color: var(--amber);
+}
+
+.step-num.dark {
+    background: rgba(56, 189, 248, 0.16);
+    color: #38BDF8;
+}
+
+.float-title {
+    font-size: 23px;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1.3;
+}
+
+.navy-card .float-title {
+    color: #FFFFFF;
+}
+
+.float-lead {
+    font-size: 16.5px;
+    line-height: 1.55;
+    color: var(--slate);
+}
+
+.navy-card .float-lead {
+    color: #CBD5E1;
+}
+
+.tag-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tag-item {
+    background: var(--slide-bg);
+    border-radius: 11px;
+    padding: 11px 16px;
+    font-size: 16px;
+    line-height: 1.48;
+    color: var(--slate);
+    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.24s ease;
+}
+
+.tag-item:hover {
+    transform: translateX(6px);
+    background: var(--sky-soft);
+}
+
+.navy-card .tag-item:hover {
+    background: rgba(56, 189, 248, 0.18);
+}
+
+.tag-item strong {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.navy-card .tag-item {
+    background: var(--navy-light);
+    color: #E2E8F0;
+}
+
+.navy-card .tag-item strong {
+    color: #38BDF8;
+}
+
+code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(2, 132, 199, 0.10);
+    color: var(--sky);
+}
+
+.navy-card code {
+    background: rgba(56, 189, 248, 0.16);
+    color: #38BDF8;
+}
+
+/* ===========================================
+   GRID LAYOUT HELPERS
+   =========================================== */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 26px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+/* ===========================================
+   BOTTOM SUMMARY STRIP
+   =========================================== */
+.bottom-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 15px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 17px;
+    color: var(--slate);
+    box-shadow: var(--shadow-sm);
+}
+
+.bottom-strip strong {
+    color: var(--sky);
+}
+
+.bottom-strip a {
+    color: var(--sky);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.bottom-strip a:hover {
+    text-decoration: underline;
+}
+
+/* ===========================================
+   ENTRANCE & STAGGERED CASCADE ANIMATIONS
+   =========================================== */
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes revealDown {
+    from {
+        opacity: 0;
+        transform: translateY(-14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardPop {
+    from {
+        opacity: 0;
+        transform: translateY(26px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes tagSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.26);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(13, 148, 136, 0);
+    }
+}
+
+.slide.active .header-bar {
+    animation: revealDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.02s both;
+}
+
+.slide.active .reveal {
+    animation: revealUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide.active .d1 { animation-delay: 0.06s; }
+.slide.active .d2 { animation-delay: 0.14s; }
+.slide.active .d3 { animation-delay: 0.24s; }
+
+.slide.active .float-card {
+    animation: cardPop 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.slide.active .float-card:nth-child(1) { animation-delay: 0.12s; }
+.slide.active .float-card:nth-child(2) { animation-delay: 0.20s; }
+.slide.active .float-card:nth-child(3) { animation-delay: 0.28s; }
+.slide.active .float-card:nth-child(4) { animation-delay: 0.36s; }
+
+.slide.active .tag-item {
+    animation: tagSlideIn 0.46s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.slide.active .tag-item:nth-child(1) { animation-delay: 0.22s; }
+.slide.active .tag-item:nth-child(2) { animation-delay: 0.28s; }
+.slide.active .tag-item:nth-child(3) { animation-delay: 0.34s; }
+.slide.active .tag-item:nth-child(4) { animation-delay: 0.40s; }
+.slide.active .tag-item:nth-child(5) { animation-delay: 0.46s; }
+
+.slide.active .bottom-strip {
+    animation: revealUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+}
+
+.slide.active .badge-teal {
+    animation: badgePulse 3s ease-in-out infinite;
+}
+
+/* ===========================================
+   VISUAL DIAGRAMS, MOCK UI & CHART COMPONENTS
+   =========================================== */
+@keyframes barGrow {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+.bar-track {
+    width: 100%;
+    height: 12px;
+    background: #E2E8F0;
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+}
+
+.navy-card .bar-track {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transform-origin: left center;
+}
+
+.slide.active .bar-fill {
+    animation: barGrow 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+
+.mock-window {
+    background: #0F172A;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    overflow: hidden;
+    color: #F8FAFC;
+    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
+    display: flex;
+    flex-direction: column;
+}
+
+.mock-topbar {
+    background: #1E293B;
+    padding: 11px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: #94A3B8;
+}
+
+.window-dots {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
+
+.win-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+.win-dot.r { background: #EF4444; }
+.win-dot.y { background: #F59E0B; }
+.win-dot.g { background: #10B981; }
+
+.mock-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.icon-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--sky-soft);
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-box.teal {
+    background: var(--teal-soft);
+    color: var(--teal);
+}
+
+.icon-box.amber {
+    background: var(--amber-soft);
+    color: var(--amber);
+}
+
+.icon-box.dark {
+    background: rgba(56, 189, 248, 0.16);
+    color: #38BDF8;
+}
+
+/* ===========================================
+   NAVIGATION & INLINE EDITOR CHROME
+   =========================================== */
+.deck-nav-pill {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #FFFFFF;
+    border: 1px solid #334155;
+    border-radius: 99px;
+    padding: 8px 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: 1px solid #475569;
+    border-radius: 99px;
+    color: #FFFFFF;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 4px 12px;
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    background: var(--sky);
+    border-color: var(--sky);
+}
+
+.nav-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(148, 163, 184, 0.35);
+    margin: 0 2px;
+}
+
+.fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-color: rgba(56, 189, 248, 0.55);
+    color: #38BDF8;
+    font-weight: 700;
+}
+
+.fullscreen-btn:hover {
+    background: var(--sky);
+    border-color: var(--sky);
+    color: #FFFFFF;
+}
+
+.fullscreen-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.nav-progress-track {
+    width: 140px;
+    height: 4px;
+    background: #334155;
+    border-radius: 99px;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-progress-fill {
+    position: absolute;
+    inset: 0;
+    background: #38BDF8;
+    transform-origin: left center;
+    transform: scaleX(0.0833);
+    transition: transform 0.25s ease;
+}
+
+.edit-hotzone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+    z-index: 10000;
+    cursor: pointer;
+}
+
+.edit-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10001;
+    background: var(--navy);
+    color: #FFFFFF;
+    border: 2px solid var(--sky);
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 16px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.edit-toggle.visible,
+.edit-toggle.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.edit-toggle.active {
+    background: var(--sky);
+}
+
+body.editing-active [data-editable="true"] {
+    outline: 1.5px dashed rgba(2, 132, 199, 0.7);
+    outline-offset: 4px;
+    cursor: text;
+}
+    </style>
+</head>
+<body>
+    <div class="edit-hotzone" id="editHotzone"></div>
+    <button class="edit-toggle" id="editToggle" title="Edit mode (Press E, Ctrl+S to export)">EDIT TEXT [E]</button>
+
+    <main class="deck-viewport">
+        <div class="deck-stage" id="deckStage">
+
+            <!-- ==========================================
+                 SLIDE 01: COVER & UNIVERSE 2026 EXECUTIVE OVERVIEW
+                 ========================================== -->
+            <section class="slide active" data-slide="1">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">GITHUB UNIVERSE 2026 · OCT 28–29</span>
+                            <span class="badge badge-teal">16 MAJOR RELEASES DEEP DIVE</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 01 / 12</div>
+                    </header>
+
+                    <div class="hero-card reveal d1" style="display: grid; grid-template-columns: 980px 640px; gap: 44px; align-items: center; padding: 34px 44px;">
+                        <div>
+                            <div style="font-family: var(--font-mono); font-size: 14px; color: var(--sky); font-weight: 700; margin-bottom: 10px;">EVOLVING EVERY LAYER OF THE STACK</div>
+                            <h1 style="font-family: var(--font-display); font-size: 52px; font-weight: 900; line-height: 1.16; margin-bottom: 16px;">
+                                GitHub Universe 2026 <span>全景新功能深度解读</span>
+                            </h1>
+                            <p style="font-size: 19.5px; line-height: 1.58; color: var(--slate); margin-bottom: 22px;">
+                                从“个人 AI 写代码插件”全面演进为<strong>端到端 Agentic 软件交付系统</strong>：连接创意、跨仓项目、多模型路由、自动工作流、全仓 AI 安全与新一代云基础设施。
+                            </p>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+                                <span class="badge" style="padding: 6px 14px;">Copilot App &amp; Projects</span>
+                                <span style="color: var(--sky); font-weight: 900;">→</span>
+                                <span class="badge" style="padding: 6px 14px;">Copilot Fusion 路由</span>
+                                <span style="color: var(--sky); font-weight: 900;">→</span>
+                                <span class="badge badge-teal" style="padding: 6px 14px;">Automations 自进化</span>
+                                <span style="color: var(--teal); font-weight: 900;">→</span>
+                                <span class="badge badge-teal" style="padding: 6px 14px;">Code Review Max</span>
+                                <span style="color: var(--teal); font-weight: 900;">→</span>
+                                <span class="badge badge-navy" style="padding: 6px 14px;">AI Scan &amp; 防火墙</span>
+                            </div>
+                        </div>
+
+                        <!-- Right Visual: Core Metrics & Three Pillars -->
+                        <div style="background: var(--navy); color: #FFFFFF; border-radius: 18px; padding: 24px 30px; display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: center;">
+                            <div style="position: relative; width: 170px; height: 170px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="170" height="170" viewBox="0 0 180 180">
+                                    <circle cx="90" cy="90" r="70" fill="none" stroke="#1E293B" stroke-width="18"/>
+                                    <circle cx="90" cy="90" r="70" fill="none" stroke="#2DD4BF" stroke-width="18" stroke-dasharray="220 440" stroke-dashoffset="0" transform="rotate(-90 90 90)" stroke-linecap="round"/>
+                                    <circle cx="90" cy="90" r="70" fill="none" stroke="#38BDF8" stroke-width="18" stroke-dasharray="176 440" stroke-dashoffset="-230" transform="rotate(-90 90 90)" stroke-linecap="round"/>
+                                </svg>
+                                <div style="position: absolute; text-align: center;">
+                                    <div style="font-family: var(--font-display); font-size: 36px; font-weight: 900; color: #2DD4BF; line-height: 1;">-50%</div>
+                                    <div style="font-size: 12px; color: #CBD5E1; margin-top: 4px;">Fusion Max 成本降幅</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 11px;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 14.5px; margin-bottom: 4px;">
+                                        <span style="color: #38BDF8; font-weight: 700;">Velocity · 单任务耗时缩短 (Fusion Max)</span>
+                                        <span style="font-family: var(--font-mono); font-weight: 700; color: #38BDF8;">-40%</span>
+                                    </div>
+                                    <div class="bar-track"><div class="bar-fill" style="width: 60%; background: #38BDF8;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 14.5px; margin-bottom: 4px;">
+                                        <span style="color: #2DD4BF; font-weight: 700;">Intelligence · 16 项全栈 Agentic 原语发布</span>
+                                        <span style="font-family: var(--font-mono); font-weight: 700; color: #2DD4BF;">100%</span>
+                                    </div>
+                                    <div class="bar-track"><div class="bar-fill" style="width: 92%; background: #2DD4BF;"></div></div>
+                                </div>
+                                <div style="font-size: 13px; color: #94A3B8; padding-top: 2px;">
+                                    三大核心支柱：<strong>Velocity（交付速度）· Intelligence（持续学习）· Quality（默认安全）</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-4 reveal d2" style="height: 375px;">
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num">01</div>
+                                    <span class="badge">7 项核心发布</span>
+                                </div>
+                                <div class="float-title">Copilot 与智能体研发</div>
+                                <p class="float-lead" style="margin-top: 6px; font-size: 15.5px;">从单文件问答升级为跨仓库目标编排、多模型路由与桌面级 GUI 操作。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>1–3：</strong>Copilot App / Computer Use · Projects · Fusion</div>
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>4–7：</strong>Automations · Session 接力 · Review Max · Connectors</div>
+                            </div>
+                        </div>
+
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num teal">02</div>
+                                    <span class="badge badge-teal">3 项平台演进</span>
+                                </div>
+                                <div class="float-title">GitHub 核心平台与协作</div>
+                                <p class="float-lead" style="margin-top: 6px; font-size: 15.5px;">解决智能体时代高频 PR 洪流与复杂上下文丢失痛点。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>8–9：</strong>Stacked PRs（堆叠式 PR）· Issue Artifacts</div>
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>10：</strong>CLI <code>--attach</code> 多媒体上传 &amp; PR 优先级视图</div>
+                            </div>
+                        </div>
+
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num amber">03</div>
+                                    <span class="badge badge-amber">4 项纵深防御</span>
+                                </div>
+                                <div class="float-title">安全与供应链防护</div>
+                                <p class="float-lead" style="margin-top: 6px; font-size: 15.5px;">在开发态画布、全仓扫描、推送拦截与依赖安装全链路内嵌 AI 防护。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>11–12：</strong>Security Extension 画布 · AI Scan 全仓扫描</div>
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>13–14：</strong>AI Secret 拦截 · Package Firewall &amp; 可达性分析</div>
+                            </div>
+                        </div>
+
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num dark">04</div>
+                                    <span class="badge badge-teal">2 项底座革新</span>
+                                </div>
+                                <div class="float-title">商业模式与底层架构</div>
+                                <p class="float-lead" style="margin-top: 6px; font-size: 15.5px;">打破席位订阅门槛，重构面向智能体高并发吞吐的 Git 与 Azure 底座。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>15：</strong>Enterprise 免独立订阅全员可用（按 AI Credits 计费）</div>
+                                <div class="tag-item" style="padding: 8px 13px; font-size: 14.5px;"><strong>16：</strong>+400万核扩容 · Azure 多区域 · 新一代解耦 Git 架构</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>大会核心主张：</strong>“重要的不是生成更多代码，而是交付完整的软件成果（Completed software work, not more code）。” — Jay Parikh</div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">USE ← → OR SPACE TO NAVIGATE · PRESS F FOR FULLSCREEN</div>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 02: UPDATE #1 — GITHUB COPILOT APP & COMPUTER USE
+                 ========================================== -->
+            <section class="slide" data-slide="2">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 01 · AGENT WORKBENCH</span>
+                            <span class="badge badge-teal">UPDATE #01 · COPILOT APP &amp; COMPUTER USE</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 02 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">01. GitHub Copilot App &amp; <span>Computer Use</span></h2>
+                        <div class="slide-subtitle">
+                            专为 Agentic 软件交付从零打造的<strong>端到端桌面与统一工作台</strong>：不止于写代码，更能写规格、生成设计配图，并直接操控本地桌面 GUI 软件。
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1020px 1fr; gap: 28px; height: 635px;" class="reveal d2">
+                        <!-- Left Column: Two Detailed Cards -->
+                        <div style="display: flex; flex-direction: column; gap: 22px;">
+                            <div class="float-card" style="flex: 1; justify-content: space-between;">
+                                <div>
+                                    <div class="card-top" style="margin-bottom: 10px;">
+                                        <span class="badge">FROM ISSUE TO MERGE IN ONE APP</span>
+                                        <span style="font-family: var(--font-mono); font-size: 13px; color: var(--sky); font-weight: 700;">GA / PUBLIC PREVIEW FEATURES</span>
+                                    </div>
+                                    <div class="float-title">从 Issue 到 Merge 的全生命周期研发中心 + 自然语言图像生成</div>
+                                    <p class="float-lead" style="margin-top: 6px;">
+                                        将跨仓库代码、智能体会话、外部工具（Slack、Figma、Datadog）与多模态创作整合在单一 Agent-First 界面中。
+                                    </p>
+                                </div>
+                                <div class="tag-list">
+                                    <div class="tag-item"><strong>超越纯编码场景：</strong>支持结合 Slack 讨论与 Figma 设计稿调研需求、撰写技术规格说明书（Specs）、准备架构评审材料及分析遥测指标。</div>
+                                    <div class="tag-item"><strong>内置自然语言图像生成与编辑：</strong>对话中直接描述视觉需求，主推理模型自动调用专用图像生成工具创建或修改图标、架构配图与 UI 素材。</div>
+                                    <div class="tag-item"><strong>交互式侧边画布（Canvases）：</strong>提供 Browser 实时预览、Editor 文档协作、Security 安全画布、Plan Tracker 等富交互面板。</div>
+                                </div>
+                            </div>
+
+                            <div class="float-card navy-card" style="flex: 1; justify-content: space-between;">
+                                <div>
+                                    <div class="card-top" style="margin-bottom: 10px;">
+                                        <span class="badge badge-teal">COMPUTER USE · PUBLIC PREVIEW (macOS &amp; Windows)</span>
+                                        <span style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8; font-weight: 700;">GUI AUTOMATION</span>
+                                    </div>
+                                    <div class="float-title">让 Copilot 直接操作无 API / 无 CLI 的本地桌面应用程序</div>
+                                    <p class="float-lead" style="margin-top: 6px;">
+                                        支持 macOS 与 Windows，通过读取无障碍树（Accessibility Tree）与界面截图，跨传统桌面软件自动执行复杂流转。
+                                    </p>
+                                </div>
+                                <div class="tag-list">
+                                    <div class="tag-item"><strong>全套 GUI 交互原语：</strong>自动读取窗口状态、点击按钮控件、输入或补丁式修改文本（<code>patch_text</code>）、拖拽与滚动，轻松打通财务报销、遗留内部系统等无接口应用。</div>
+                                    <div class="tag-item"><strong>安全授权与物理输入礼让：</strong>控制任何桌面应用前必须获用户显式批准；若检测到用户正在键鼠操作该应用，自动中断礼让（Interrupted）并重新同步状态。</div>
+                                    <div class="tag-item"><strong>开启方式与企业管控：</strong>在 <code>Settings &gt; Computer Use</code> 开启（macOS 需授予辅助功能与录屏权限）；企业管理员可通过 Managed Settings 全局禁用。</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Mock Copilot App & Computer Use Window -->
+                        <div class="mock-window" style="height: 100%;">
+                            <div class="mock-topbar">
+                                <div class="window-dots">
+                                    <span class="win-dot r"></span>
+                                    <span class="win-dot y"></span>
+                                    <span class="win-dot g"></span>
+                                    <span style="margin-left: 8px; color: #E2E8F0; font-weight: 700;">GitHub Copilot App — Agentic Workbench</span>
+                                </div>
+                                <span>macOS / Windows</span>
+                            </div>
+                            <div class="mock-body" style="justify-content: space-between;">
+                                <div style="background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 16px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-family: var(--font-mono); font-size: 12px; color: #38BDF8; font-weight: 700;">PROMPT · MULTIMODAL + DESKTOP WORKFLOW</span>
+                                        <span style="font-family: var(--font-mono); font-size: 11px; color: #94A3B8;">Connected: Figma · Slack</span>
+                                    </div>
+                                    <div style="font-size: 14.5px; color: #F8FAFC; line-height: 1.55;">
+                                        “读取 Slack <code>#launch-q4</code> 频道的设计决议，为新发布页面生成一张吉祥物 Mona 的暗色主题横幅插画，然后将报销单数据填入本地桌面 ERP 客户端。”
+                                    </div>
+                                </div>
+
+                                <!-- Step 1: Image Generation -->
+                                <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 15px;">
+                                    <div style="font-family: var(--font-mono); font-size: 12px; color: #38BDF8; font-weight: 700; margin-bottom: 6px;">✓ TOOL CALL · IMAGE GENERATION</div>
+                                    <div style="font-size: 14px; color: #E2E8F0; line-height: 1.5;">
+                                        推理模型自动调用内置专用生图模型 → 已生成 <code>mona-launch-banner.png</code> 并支持自然语言局部重绘修改。
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Computer Use -->
+                                <div style="background: rgba(45, 212, 191, 0.08); border: 1px solid rgba(45, 212, 191, 0.4); border-radius: 12px; padding: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="font-family: var(--font-mono); font-size: 12px; color: #2DD4BF; font-weight: 700;">⚡ COMPUTER USE · APP CONTROL CONSENT</span>
+                                        <span class="badge badge-teal" style="font-size: 11px; padding: 3px 10px;">User Approved</span>
+                                    </div>
+                                    <div style="font-family: var(--font-mono); font-size: 12.5px; color: #CBD5E1; background: #0F172A; padding: 10px 12px; border-radius: 8px; line-height: 1.6;">
+                                        1. get_window_state(app="LegacyERP") → diff tree<br/>
+                                        2. set_value(element_index=14, value="Universe-2026")<br/>
+                                        3. click(element_index=22, label="Save Draft")<br/>
+                                        <span style="color: #FCD34D;">[Policy] High-stakes submit held for human confirmation</span>
+                                    </div>
+                                </div>
+
+                                <div style="background: #1E293B; border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; color: #94A3B8;">
+                                    <span>支持平台：macOS (Accessibility + Screen Recording) / Windows</span>
+                                    <span style="color: #38BDF8; font-family: var(--font-mono); font-weight: 700;">Public Preview</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>核心突破：</strong>打通“代码仓 + 协同文档 + 视觉资产 + 无接口传统桌面软件”最后一公里，让开发者专注于意图表达与关键决策。</div>
+                        <a href="https://github.blog/changelog/2026-10-28-github-copilot-app-universe-releases/" target="_blank">官方文档：Copilot App Universe Releases →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 03: UPDATE #2 — COPILOT PROJECTS
+                 ========================================== -->
+            <section class="slide" data-slide="3">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 01 · AGENT WORKBENCH</span>
+                            <span class="badge badge-teal">UPDATE #02 · COPILOT PROJECTS (PUBLIC PREVIEW)</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 03 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">02. Copilot Projects：<span>围绕业务目标协调跨仓并行工作</span></h2>
+                        <div class="slide-subtitle">
+                            真实工作往往跨越多个仓库甚至无需代码库。给 Copilot 设定一个<strong>持续性目标（Goal）</strong>，由它自动拉起并行会话、沉淀产物并按周期复盘。
+                        </div>
+                    </div>
+
+                    <!-- Top Visual Flow / Mock Overview Board -->
+                    <div class="hero-card reveal d2" style="padding: 24px 32px; background: var(--navy); color: #FFFFFF;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8; font-weight: 700;">
+                                COPILOT PROJECT OVERVIEW BOARD · 跨仓库并行会话状态分组与实时引导 (Steer)
+                            </div>
+                            <span class="badge badge-teal" style="font-size: 12px; padding: 4px 12px;">支持绑定多个 Repos 或 0 Repo 纯研究/规划项目</span>
+                        </div>
+                        <div class="grid-4" style="gap: 16px;">
+                            <div style="background: rgba(245, 158, 11, 0.14); border: 1.5px solid #F59E0B; border-radius: 12px; padding: 14px 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-family: var(--font-mono); font-size: 12px; color: #FCD34D; font-weight: 700;">1. NEEDS INPUT</span>
+                                    <span style="background: #F59E0B; color: #0F172A; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 99px;">优先处理</span>
+                                </div>
+                                <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">需人工拍板与授权</div>
+                                <div style="font-size: 13.5px; color: #CBD5E1; line-height: 1.45;">集中展示阻塞在架构选择、Plan 审批或权限请求的会话，一键回复继续推进。</div>
+                            </div>
+
+                            <div style="background: rgba(56, 189, 248, 0.12); border: 1.5px solid #38BDF8; border-radius: 12px; padding: 14px 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-family: var(--font-mono); font-size: 12px; color: #38BDF8; font-weight: 700;">2. OPEN (PR READY)</span>
+                                    <span style="font-family: var(--font-mono); font-size: 11px; color: #6EE7B7;">+342 / -89</span>
+                                </div>
+                                <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">已生成待审 PR</div>
+                                <div style="font-size: 13.5px; color: #CBD5E1; line-height: 1.45;">直观显示每个会话关联的跨仓 Pull Request 状态、增删行数与审查进度。</div>
+                            </div>
+
+                            <div style="background: #1E293B; border: 1px solid #475569; border-radius: 12px; padding: 14px 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-family: var(--font-mono); font-size: 12px; color: #94A3B8; font-weight: 700;">3. WORKING</span>
+                                    <span style="font-family: var(--font-mono); font-size: 11px; color: #38BDF8;">Parallel Agents</span>
+                                </div>
+                                <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">后台并行执行中</div>
+                                <div style="font-size: 13.5px; color: #CBD5E1; line-height: 1.45;">按需并发运行多个子智能体；随时点击任意会话通过 <strong>Steer this session</strong> 插话纠偏。</div>
+                            </div>
+
+                            <div style="background: rgba(45, 212, 191, 0.12); border: 1.5px solid #2DD4BF; border-radius: 12px; padding: 14px 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-family: var(--font-mono); font-size: 12px; color: #2DD4BF; font-weight: 700;">4. DONE</span>
+                                    <span style="font-family: var(--font-mono); font-size: 11px; color: #2DD4BF;">Archived to Library</span>
+                                </div>
+                                <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">已完成与产物沉淀</div>
+                                <div style="font-size: 13.5px; color: #CBD5E1; line-height: 1.45;">完成的代码合并与调研报告自动归档，作为后续迭代任务的历史上下文。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom 3 Cards -->
+                    <div class="grid-3 reveal d3" style="height: 390px;">
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <div class="step-num">A</div>
+                                    <span class="badge">GOAL-DRIVEN ORCHESTRATION</span>
+                                </div>
+                                <div class="float-title">目标驱动与跨仓/无仓灵活建项</div>
+                                <p class="float-lead" style="margin-top: 6px;">告别“一个仓库开一个孤立窗口”的碎片化管理。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>跨多仓库协同：</strong>在创建 Project 时可添加多个关联前后端/微服务仓库，统一推进大特性。</div>
+                                <div class="tag-item"><strong>无仓库纯知识工作：</strong>支持不添加任何仓库，专门用于分析客户反馈、输出竞品报告或制定产品发布计划。</div>
+                            </div>
+                        </div>
+
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <div class="step-num teal">B</div>
+                                    <span class="badge badge-teal">PROJECT LIBRARY (USER + AGENT)</span>
+                                </div>
+                                <div class="float-title">专属资料库（Library）双向沉淀</div>
+                                <p class="float-lead" style="margin-top: 6px;">把输入背景资料与智能体输出成果物集中管理。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>User 资料区：</strong>上传 PRD 规格文档、设计会议纪要、客户原始反馈文件或文件夹，供所有会话引用。</div>
+                                <div class="tag-item"><strong>Agent 产物区：</strong>智能体在各会话中生成的主题聚类报告、架构对比方案自动保存在 <code>All Files &gt; Agent</code> 下。</div>
+                            </div>
+                        </div>
+
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <div class="step-num dark">C</div>
+                                    <span class="badge badge-teal">RECURRING PROJECT WORK</span>
+                                </div>
+                                <div class="float-title">自然语言设定项目级周期自动化</div>
+                                <p class="float-lead" style="margin-top: 6px;">直接在项目对话中吩咐定时执行的长期例行任务。</p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>一句话创建定时任务：</strong>如“每周一早 9 点汇总本周新增客户反馈并按主题分类”，自动注册到项目的 <code>Automations</code> 标签页。</div>
+                                <div class="tag-item"><strong>对话式动态调整：</strong>随时在对话中要求修改执行时间或分析重点，也可在面板中手动暂停、编辑或删除。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>适用边界建议：</strong>单仓库明确开发任务可直接从该 Repo 发起 Session；跨多仓特性、长期专项调研或周期性复盘建议使用 <strong>Copilot Projects</strong>。</div>
+                        <a href="https://docs.github.com/copilot/how-tos/github-copilot-app/working-with-projects" target="_blank">官方文档：Working with Projects →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 04: UPDATE #3 — COPILOT FUSION (GA)
+                 ========================================== -->
+            <section class="slide" data-slide="4">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 01 · MULTI-MODEL ORCHESTRATION</span>
+                            <span class="badge badge-teal">UPDATE #03 · COPILOT FUSION (GA)</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 04 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">03. Copilot Fusion：<span>多模型智能路由与运行时编排 (GA)</span></h2>
+                        <div class="slide-subtitle">
+                            开发者只需选择<strong>投入级别（Standard / High / Max）</strong>，Copilot Fusion 根据任务推理、编码、调试与工具调用复杂度，在单模型或多模型组合间自动路由。
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 860px 1fr; gap: 26px; height: 635px;" class="reveal d2">
+                        <!-- Left: 3 Execution Patterns -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <span class="badge">THREE RUNTIME EXECUTION PATTERNS</span>
+                                    <span style="font-family: var(--font-mono); font-size: 12.5px; color: var(--sky); font-weight: 700;">PER-PROMPT DYNAMIC ROUTING</span>
+                                </div>
+                                <div class="float-title">三大运行时执行模式（同一会话内按每条 Prompt 动态切换）</div>
+                                <p class="float-lead" style="margin-top: 4px;">
+                                    结合实时模型健康度与自然缓存边界（Cache Boundaries）智能选路，简单任务绝不浪费额外 Credits。
+                                </p>
+                            </div>
+
+                            <div class="tag-list" style="gap: 12px;">
+                                <div class="tag-item" style="border-left: 4px solid var(--sky);">
+                                    <strong>1. Single（单模型直出）：</strong><br/>
+                                    针对日常明确指令，直接匹配最适合的单一模型一次性完成任务，零额外评审延迟与费用。
+                                </div>
+                                <div class="tag-item" style="border-left: 4px solid var(--teal);">
+                                    <strong>2. Cascade（级联起草 + 裁判升级）：</strong><br/>
+                                    先由高性价比模型快速起草方案，再由独立的<strong>裁判模型（Judge）</strong>审查质量；若达标则直接采纳，若存在缺陷则自动升级（Escalate）至更强推理模型重写。
+                                </div>
+                                <div class="tag-item" style="border-left: 4px solid var(--amber);">
+                                    <strong>3. Critique（多模型并行挑错评审 + 汇总修正）：</strong><br/>
+                                    一个主模型起草响应，<strong>多个异构模型在后台并行独立评审挑错（Critique）</strong>，系统汇总各方反馈后交由原模型迭代修正，仅向用户展示最终打磨后的高质量结果（悬停可查看参与模型列表）。
+                                </div>
+                            </div>
+
+                            <div style="background: var(--sky-soft); border-radius: 12px; padding: 12px 16px; font-size: 14.5px; color: var(--navy);">
+                                <strong>端侧本地模型自动路由（Public Preview）：</strong>在 <code>Fusion Standard</code> 档位下，若本地安装了 <code>MAI Code 1.1 Flash</code>（Windows）或通过 Ollama 运行 <code>Qwen3.8 Flash Next</code>（Win/macOS/Linux），开启实验开关后 Fusion 会优先调度本地模型以节省额度并降低延迟。
+                            </div>
+                        </div>
+
+                        <!-- Right: 4 Effort Levels + Benchmark Comparison -->
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="float-card navy-card" style="padding: 22px 28px; justify-content: space-between;">
+                                <div class="card-top">
+                                    <span class="badge badge-teal">ARTIFICIAL ANALYSIS CODING AGENT INDEX</span>
+                                    <span style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8; font-weight: 700;">FUSION MAX vs OPUS 5.5 MAX</span>
+                                </div>
+                                <div class="float-title" style="font-size: 21px;">评测表现逼近顶尖单模型（分差 &lt; 2 分），成本减半、耗时缩短 40%</div>
+                                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+                                            <span style="color: #E2E8F0;">单任务平均 AI Credits 成本对比（Fusion Max 仅需 50%）</span>
+                                            <span style="font-family: var(--font-mono); color: #2DD4BF; font-weight: 700;">-50% COST</span>
+                                        </div>
+                                        <div class="bar-track"><div class="bar-fill" style="width: 50%; background: #2DD4BF;"></div></div>
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+                                            <span style="color: #E2E8F0;">单任务端到端处理耗时对比（Fusion Max 提速 40%）</span>
+                                            <span style="font-family: var(--font-mono); color: #38BDF8; font-weight: 700;">-40% TIME</span>
+                                        </div>
+                                        <div class="bar-track"><div class="bar-fill" style="width: 60%; background: #38BDF8;"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="float-card" style="flex: 1; justify-content: space-between; padding: 22px 28px;">
+                                <div class="card-top">
+                                    <span class="badge">EFFORT LEVELS MATRIX</span>
+                                    <span style="font-family: var(--font-mono); font-size: 12.5px; color: var(--muted);">GA in VS Code · CLI · Copilot App · JetBrains</span>
+                                </div>
+                                <div class="tag-list" style="gap: 10px;">
+                                    <div class="tag-item">
+                                        <strong>Fusion Standard（日常均衡）：</strong>平衡成本、质量与响应速度，每次为任务挑选最合适的单个模型（支持路由至本地 Flash 模型）。
+                                    </div>
+                                    <div class="tag-item">
+                                        <strong>Fusion High（高阶编排）：</strong>面向跨多文件修改或复杂 Bug 定位，适度引入额外模型验证调用，兼顾准确率与 Token 节省。
+                                    </div>
+                                    <div class="tag-item">
+                                        <strong>Fusion Max（前沿极限推理）：</strong>调动最强模型池与 Critique/Cascade 模式，攻克最深层的架构重构与疑难杂症。
+                                    </div>
+                                    <div class="tag-item">
+                                        <strong>Fusion Fast（极速内联）：</strong>系统自动在 VS Code Inline Chat 等强低延迟场景内部调用（无需用户手动选择）。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>告别模型选择困难症：</strong>把“选哪个模型”交给运行时路由器，开发者只需按任务重要程度调整 <strong>Standard / High / Max</strong> 档位。</div>
+                        <a href="https://docs.github.com/copilot/concepts/models/copilot-fusion" target="_blank">官方文档：About GitHub Copilot Fusion →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 05: UPDATE #4 — COPILOT AUTOMATIONS & AGENTIC WORKFLOWS
+                 ========================================== -->
+            <section class="slide" data-slide="5">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 01 · SELF-IMPROVING WORKFLOWS</span>
+                            <span class="badge badge-teal">UPDATE #04 · AUTOMATIONS &amp; AGENTIC WORKFLOWS</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 05 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">04. Copilot Automations &amp; <span>Agentic Workflows (GA)</span></h2>
+                        <div class="slide-subtitle">
+                            将可复用的 Prompt、事件触发器与受控工具集封装为云端自动化任务，并具备<strong>从运行结果中自我学习并提出改进建议</strong>的能力。
+                        </div>
+                    </div>
+
+                    <div class="grid-3 reveal d2" style="height: 635px;">
+                        <!-- Card 1: Triggers & Security -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num">01</div>
+                                    <span class="badge">TRIGGERS &amp; GUARDRAILS</span>
+                                </div>
+                                <div class="float-title">多元触发器与防注入安全边界</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    在 GitHub 仓库 Agents 页、Copilot App、VS Code（v1.144+）或 REST API 统一创建与管理。
+                                </p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>三大触发方式：</strong>定时调度（Hourly / Daily / Weekly）、仓库事件（Issue 创建、PR 打开或新 Commit 同步）及 REST API 外部调用（支持传入动态上下文）。</div>
+                                <div class="tag-item"><strong>精准过滤条件：</strong>支持配置搜索查询过滤器（Search Query）与 PR 变更文件路径过滤，仅在匹配的事件上启动 Cloud Agent。</div>
+                                <div class="tag-item"><strong>默认防 Prompt 注入：</strong>默认忽略无仓库写权限（Write access）用户触发的事件，防止外部不可信用户通过提 Issue 诱导智能体越权操作。</div>
+                                <div class="tag-item"><strong>最小权限工具勾选：</strong>精确勾选允许调用的 GitHub 原生工具或外部 MCP Server 工具，支持一键 <code>Suggest tools</code> 智能推荐与 AI Credits 消费上限控制。</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Personal vs Shared -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num teal">02</div>
+                                    <span class="badge badge-teal">PERSONAL vs SHARED MODE</span>
+                                </div>
+                                <div class="float-title">个人（Personal）与团队共享（Shared）双模式</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    针对个人效率与团队公共工程流水线提供清晰的权限、身份与计费隔离（仅限私有/内部仓库）。
+                                </p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>可见性与编辑权：</strong>Personal 仅创建者自己可见可改（运行记录全仓可读）；Shared 对全仓只读成员可见、所有拥有 Write 权限的成员均可协同编辑维护。</div>
+                                <div class="tag-item"><strong>执行身份（Identity）：</strong>Personal 以创建者个人账号身份执行 GitHub 操作；Shared 以独立的 <strong>Copilot 官方身份</strong>执行，创建者离职或权限变更不会导致流水线中断。</div>
+                                <div class="tag-item"><strong>计费归属（Billing）：</strong>每次运行消耗 GitHub AI Credits 与 Actions 分钟数；Personal 计入个人额度，Shared 统一计入仓库所属组织或企业账单。</div>
+                                <div class="tag-item"><strong>自动继承仓库配置：</strong>无缝继承目标仓库的 Custom Instructions、Agent Skills、Firewall 规则以及云端 Secrets 与环境变量。</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Self-Improving & Agentic Workflows GA -->
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num dark">03</div>
+                                    <span class="badge badge-teal">CONTINUOUS LEARNING ENGINE</span>
+                                </div>
+                                <div class="float-title">自进化学习引擎 &amp; Agentic Workflows 开源 GA</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    让自动化不仅能执行任务，还能根据执行结果持续演进迭代。
+                                </p>
+                            </div>
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>Automation Groups 自优化：</strong>将相关联的多个 Automation 编入同一群组共享上下文；系统会根据历史运行结果与人类反馈，<strong>自动生成针对 Prompt 和流程的改进提案</strong>供开发者审批。</div>
+                                <div class="tag-item"><strong>典型高价值场景：</strong>新 Issue 自动复现 Bug、PR 就绪时自动启动浏览器截图并挂载评论、监控告警触发生产事故初步根因排查。</div>
+                                <div class="tag-item"><strong>GitHub Agentic Workflows (GA)：</strong>源自 GitHub Next 的开源项目正式全面可用，支持以声明式方式在 Actions 中自动化处理 Issue 分诊、CI 失败分析与文档同步更新。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>核心进化：</strong>传统 CI/CD 只能运行确定性脚本；<strong>Copilot Automations</strong> 让仓库具备了可共享、受权限约束且越用越聪明的推理型流水线。</div>
+                        <a href="https://docs.github.com/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/about-automations" target="_blank">官方文档：Copilot Automations →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 06: UPDATES #5 & #7 — SESSION CONTINUITY & COPILOT CONNECTORS
+                 ========================================== -->
+            <section class="slide" data-slide="6">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 01 · UBIQUITOUS CONTEXT</span>
+                            <span class="badge badge-teal">UPDATES #05 &amp; #07 · CONTINUITY &amp; CONNECTORS</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 06 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">05 &amp; 07. 跨端会话无缝接力与<span>托管式 MCP 连接器</span></h2>
+                        <div class="slide-subtitle">
+                            消除设备切换与繁琐的本地工具配置：<strong>Session Continuity</strong> 让云端智能体随身流转，<strong>Copilot Connectors</strong> 实现外部服务一次认证、全端可用。
+                        </div>
+                    </div>
+
+                    <div class="grid-2 reveal d2" style="height: 635px;">
+                        <!-- Left: Update #5 Session Continuity -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <span class="badge">UPDATE #05 · SESSION CONTINUITY</span>
+                                    <span style="font-family: var(--font-mono); font-size: 13px; color: var(--sky); font-weight: 700;">CLOUD HARNESS SYNC</span>
+                                </div>
+                                <div class="float-title" style="font-size: 26px;">Session Continuity：跨五端无缝接力同一个云端会话</div>
+                                <p class="float-lead" style="margin-top: 8px;">
+                                    当你在切换设备或开发工具时，工作不应被迫重启。依托高性能云端多模型运行底座（Multi-model Harness），同一个 Cloud Agent 会话可在所有终端间实时同步。
+                                </p>
+                            </div>
+
+                            <!-- Visual Relay Timeline -->
+                            <div style="background: var(--slide-bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+                                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">全天候跨端接力典型动线 (SEAMLESS HANDOFF)</div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                                    <div style="background: var(--surface); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                                        <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--teal); font-weight: 700;">09:30 · 早会期间</div>
+                                        <div style="font-weight: 800; font-size: 15px; margin: 4px 0;">GitHub Mobile / App</div>
+                                        <div style="font-size: 13px; color: var(--slate);">在手机上发起云端智能体会话，指派重构与排查任务。</div>
+                                    </div>
+                                    <div style="background: var(--surface); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                                        <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--sky); font-weight: 700;">10:30 · 回到工位</div>
+                                        <div style="font-weight: 800; font-size: 15px; margin: 4px 0;">VS Code / CLI</div>
+                                        <div style="font-size: 13px; color: var(--slate);">直接连入同一会话查看实时日志，发送补充指令微调实现方向。</div>
+                                    </div>
+                                    <div style="background: var(--surface); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                                        <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--amber); font-weight: 700;">12:30 · 午休时段</div>
+                                        <div style="font-weight: 800; font-size: 15px; margin: 4px 0;">github.com Web</div>
+                                        <div style="font-size: 13px; color: var(--slate);">在网页端检查已完成的代码变更与测试结果，一键合并 PR。</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>全客户端覆盖：</strong>支持 <strong>GitHub Copilot App、VS Code、Copilot CLI、GitHub Web 与 GitHub Mobile</strong> 实时互通。</div>
+                                <div class="tag-item"><strong>云端持续托管运行：</strong>即使关闭本地笔记本电脑，Agent 依然在云端沙箱中继续完成构建、测试与 PR 提交。</div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Update #7 Copilot Connectors -->
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <span class="badge badge-teal">UPDATE #07 · COPILOT CONNECTORS</span>
+                                    <span style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8; font-weight: 700;">MANAGED MCP SERVERS</span>
+                                </div>
+                                <div class="float-title" style="font-size: 26px;">Copilot Connectors：一次身份认证，全端共享外部工具</div>
+                                <p class="float-lead" style="margin-top: 8px;">
+                                    彻底解决在每个 IDE、CLI 和云端环境重复编写 <code>mcp.json</code> 与管理 Token 的痛点。由 GitHub 统一配置并托管受支持的 MCP Server 连接。
+                                </p>
+                            </div>
+
+                            <!-- Visual Hub Diagram -->
+                            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+                                <div style="font-family: var(--font-mono); font-size: 12px; color: #2DD4BF; font-weight: 700;">ONE-TIME OAUTH → GITHUB MANAGED MCP HUB → ALL SURFACES</div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span class="badge badge-teal">Vercel</span>
+                                    <span class="badge badge-teal">Cloudflare</span>
+                                    <span class="badge badge-teal">Sentry</span>
+                                    <span class="badge badge-teal">Datadog</span>
+                                    <span class="badge badge-teal">Figma</span>
+                                    <span class="badge badge-teal">Slack</span>
+                                </div>
+                                <div style="font-size: 13.5px; color: #CBD5E1; line-height: 1.5;">
+                                    只需对第三方服务完成一次安全授权，GitHub 即自动将对应的 MCP 工具能力同步下发至：<strong>Copilot App · Copilot CLI · VS Code · GitHub Web · Copilot Code Review</strong>。
+                                </div>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>开箱即用的生产与设计上下文：</strong>在任何终端提问时，Copilot 均可直接拉取 Sentry 报错堆栈、Cloudflare/Vercel 部署日志或 Figma 设计节点。</div>
+                                <div class="tag-item"><strong>统一安全与凭证治理：</strong>凭证由 GitHub 集中安全托管，配合企业级权限策略，避免开发者在本地明文散落第三方 API Keys。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>协同效应：</strong>Session Continuity 实现了<strong>“会话状态随人走”</strong>，Copilot Connectors 实现了<strong>“外部工具能力随会话走”</strong>。</div>
+                        <a href="https://docs.github.com/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents" target="_blank">官方文档：Manage and Track Agents →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 07: UPDATE #6 — COPILOT CODE REVIEW MAX
+                 ========================================== -->
+            <section class="slide" data-slide="7">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 01 · AGENTIC QUALITY GATE</span>
+                            <span class="badge badge-teal">UPDATE #06 · COPILOT CODE REVIEW MAX</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 07 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">06. Copilot Code Review Max：<span>高危缺陷检出率第一的深度代码审查</span></h2>
+                        <div class="slide-subtitle">
+                            当 AI 让代码产出速度倍增，代码审查成为质量守门的核心。新增 <strong>Max 深度分析档位</strong>，在 ReviewBench 高危漏洞基准测试中取得最高 F1 分数。
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 920px 1fr; gap: 26px; height: 635px;" class="reveal d2">
+                        <!-- Left: 3 Review Effort Levels Comparison -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <span class="badge">THREE REVIEW EFFORT LEVELS</span>
+                                    <span style="font-family: var(--font-mono); font-size: 12.5px; color: var(--sky); font-weight: 700;">ADMIN CONFIGURABLE DEFAULT</span>
+                                </div>
+                                <div class="float-title">三档审查深度按需匹配（Lite · Balanced · Max）</div>
+                                <p class="float-lead" style="margin-top: 4px;">
+                                    仓库与组织管理员可配置自动审查的默认档位；开发者也可针对关键 PR 按需触发 Max 深度审查。
+                                </p>
+                            </div>
+
+                            <div class="tag-list" style="gap: 12px;">
+                                <div class="tag-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>1. Lite（快速轻量审查）：</strong><br/>
+                                        面向小幅改动与日常高频提交，极速反馈基础语法、规范与明显瑕疵。
+                                    </div>
+                                    <div style="text-align: right; font-family: var(--font-mono); flex-shrink: 0; margin-left: 16px;">
+                                        <div style="font-size: 18px; font-weight: 800; color: var(--sky);">~$0.25 / 次</div>
+                                        <div style="font-size: 12px; color: var(--muted);">区间 $0.05–$1.00</div>
+                                    </div>
+                                </div>
+
+                                <div class="tag-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>2. Balanced（标准平衡审查）：</strong><br/>
+                                        兼顾审查深度与响应速度，适合绝大多数常规特性 Pull Request。
+                                    </div>
+                                    <div style="text-align: right; font-family: var(--font-mono); flex-shrink: 0; margin-left: 16px;">
+                                        <div style="font-size: 18px; font-weight: 800; color: var(--teal);">~$1.50 / 次</div>
+                                        <div style="font-size: 12px; color: var(--muted);">区间 $0.25–$5.00</div>
+                                    </div>
+                                </div>
+
+                                <div class="tag-item" style="border: 1.5px solid var(--sky); background: var(--sky-soft); display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>3. Max（全新 · 深度多维推理审查）：</strong><br/>
+                                        面向核心架构演进、高复杂度并发逻辑与关键安全变更，提供最彻底的跨文件推演，<strong>ReviewBench 高危问题 F1 排名第一</strong>。
+                                    </div>
+                                    <div style="text-align: right; font-family: var(--font-mono); flex-shrink: 0; margin-left: 16px;">
+                                        <div style="font-size: 18px; font-weight: 800; color: var(--navy);">~$10.00 / 次</div>
+                                        <div style="font-size: 12px; color: var(--slate);">区间 $1.50–$25.00</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="font-size: 13.5px; color: var(--muted);">
+                                * 支持环境：GitHub.com、GitHub CLI、GitHub Mobile、VS Code、Visual Studio、Xcode、JetBrains IDEs 及 Azure DevOps (Preview)。
+                            </div>
+                        </div>
+
+                        <!-- Right: Agentic Capabilities & Unlicensed Member Access -->
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="float-card" style="flex: 1; justify-content: space-between;">
+                                <div>
+                                    <div class="card-top" style="margin-bottom: 8px;">
+                                        <span class="badge badge-teal">AGENTIC REVIEW CAPABILITIES</span>
+                                        <span style="font-family: var(--font-mono); font-size: 12px; color: var(--teal); font-weight: 700;">ACTIONS RUNNER POWERED</span>
+                                    </div>
+                                    <div class="float-title" style="font-size: 21px;">依托 Actions Runner 的两大智能体级审查能力</div>
+                                </div>
+                                <div class="tag-list">
+                                    <div class="tag-item"><strong>全仓上下文采集（Full project context gathering）：</strong>不再只看 PR Diff 片段，而是利用 GitHub Actions Runner（支持标准、大型或自托管 Runner）分析整个代码库依赖与调用链。</div>
+                                    <div class="tag-item"><strong>一键转交 Cloud Agent 自动修复（Public Preview）：</strong>将审查发现的问题直接交给 Copilot Cloud Agent，自动针对当前分支创建包含修复代码的新 PR。</div>
+                                </div>
+                            </div>
+
+                            <div class="float-card navy-card" style="flex: 1; justify-content: space-between;">
+                                <div>
+                                    <div class="card-top" style="margin-bottom: 8px;">
+                                        <span class="badge badge-teal">NO COPILOT SEAT LICENSE REQUIRED</span>
+                                        <span style="font-family: var(--font-mono); font-size: 12px; color: #38BDF8; font-weight: 700;">ORG POLICY UNLOCK</span>
+                                    </div>
+                                    <div class="float-title" style="font-size: 21px;">无 Copilot 许可证的组织成员也能使用代码审查</div>
+                                </div>
+                                <div class="tag-list">
+                                    <div class="tag-item"><strong>全员守门无盲区：</strong>在 Copilot Business / Enterprise 组织中，管理员开启 <code>AI credits paid usage</code> 与无证成员审查策略后，未分配 Copilot 席位的成员也能在 GitHub.com 请求或自动触发 PR 审查。</div>
+                                    <div class="tag-item"><strong>精细计费归属：</strong>支持对人类 PR、Copilot Cloud Agent PR 以及第三方 Bot PR（如 Dependabot）进行自动审查并按规则归集 AI Credits 账单。</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>最佳实践：</strong>日常 PR 默认启用 <strong>Balanced</strong> 自动把关；涉及核心链路、支付结算或大规模重构的 PR 显式调用 <strong>Copilot Code Review Max</strong>。</div>
+                        <a href="https://docs.github.com/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review" target="_blank">官方文档：GitHub Copilot Code Review →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 08: UPDATES #8, #9, #10 — GITHUB CORE PLATFORM
+                 ========================================== -->
+            <section class="slide" data-slide="8">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 02 · GITHUB PLATFORM EVOLUTION</span>
+                            <span class="badge badge-teal">UPDATES #08 · #09 · #10</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 08 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">08–10. 平台核心升级：<span>Stacked PRs · Issue Artifacts · CLI 增强</span></h2>
+                        <div class="slide-subtitle">
+                            当开发者与智能体每天产出更多变更，GitHub 原生重构了<strong>大型变更拆分合并、Issue 思考脉络留存与终端多媒体交互</strong>体验。
+                        </div>
+                    </div>
+
+                    <div class="grid-3 reveal d2" style="height: 635px;">
+                        <!-- Update #8: Stacked Pull Requests -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num">08</div>
+                                    <span class="badge">STACKED PULL REQUESTS</span>
+                                </div>
+                                <div class="float-title">Stacked PRs：把复杂大变更拆成易读的关联 PR 栈</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    告别动辄数千行、无人敢审的巨型 PR，原生支持将大型工作拆分为层层递进、逻辑独立的关联 PR 链。
+                                </p>
+                            </div>
+
+                            <!-- Mini Visual Stack -->
+                            <div style="background: var(--slide-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-family: var(--font-mono); font-size: 13px; display: flex; flex-direction: column; gap: 6px;">
+                                <div style="color: var(--teal); font-weight: 700;">[PR #101] Base Schema &amp; API ✓ Approved</div>
+                                <div style="color: var(--sky); font-weight: 700; padding-left: 14px;">↳ [PR #102] Service Layer ✓ Approved</div>
+                                <div style="color: var(--navy); font-weight: 700; padding-left: 28px;">↳ [PR #103] Frontend UI ✓ Approved</div>
+                                <div style="margin-top: 4px; background: var(--navy); color: #38BDF8; text-align: center; padding: 6px; border-radius: 8px; font-weight: 700;">
+                                    Merge Full Stack in One Click
+                                </div>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>独立分块审查：</strong>评审者可按底层数据结构、业务逻辑、前端界面逐层独立审查，大幅降低认知负荷。</div>
+                                <div class="tag-item"><strong>一键合并整栈：</strong>整组 PR 全部通过后，点击一次即可按依赖顺序合并整个 PR Stack，告别繁琐的手动级联 Rebase。</div>
+                            </div>
+                        </div>
+
+                        <!-- Update #9: Issue Artifacts -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num teal">09</div>
+                                    <span class="badge badge-teal">ISSUE ARTIFACTS</span>
+                                </div>
+                                <div class="float-title">Issue Artifacts：把方案、调研与思考脉络留在工单上</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    “Keep the plan with the work” —— 让实施计划与架构调研不再淹没在冗长的聊天记录或外部零散文档中。
+                                </p>
+                            </div>
+
+                            <div style="background: var(--slide-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--teal); font-weight: 700;">ATTACHED TO ISSUE #42</div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <span class="badge" style="font-size: 12px;">Plan · 实施方案</span>
+                                    <span class="badge badge-teal" style="font-size: 12px;">Generic · 根因调研报告</span>
+                                    <span class="badge badge-amber" style="font-size: 12px;">Link · 设计稿/监控链接</span>
+                                </div>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>结构化挂载三类产物：</strong>支持在 Issue 上直接挂载实施计划（<code>plan</code>）、外部参考链接（<code>link</code>）以及通用长文分析（如架构设计、事故复盘、调研笔记 <code>generic</code>）。</div>
+                                <div class="tag-item"><strong>人机共享记忆底座：</strong>团队成员与后续接手该 Issue 的 AI 智能体可立即读取工作背后的完整决策依据。</div>
+                            </div>
+                        </div>
+
+                        <!-- Update #10: GitHub CLI --attach & Repo PR View -->
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num dark">10</div>
+                                    <span class="badge badge-teal">CLI &amp; PR TRIAGE EXPERIENCE</span>
+                                </div>
+                                <div class="float-title">GitHub CLI <code>--attach</code> 与仓库 PR 优先级视图</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    打通终端自动化截图/录屏上传链路，并重塑仓库级的 Pull Requests 待办筛选体验。
+                                </p>
+                            </div>
+
+                            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.6;">
+                                $ gh pr create --title "Fix layout" \<br/>
+                                &nbsp;&nbsp;<span style="color: #2DD4BF; font-weight: 700;">--attach</span> ./before.png \<br/>
+                                &nbsp;&nbsp;<span style="color: #2DD4BF; font-weight: 700;">--attach</span> ./after-demo.mp4
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>CLI 可重复 <code>--attach</code> 参数：</strong>在终端直接将多张图片和视频内联上传至 Issue、PR 正文或评论中，非常适合 CLI 智能体自动附带 UI 验证截图或录屏证据。</div>
+                                <div class="tag-item"><strong>Repository Pull Requests 新视图：</strong>快速扫描所有开启的 PR，清晰呈现阻塞状态，帮你第一时间定位<strong>“当下最需要你介入审查或响应”</strong>的工作。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>平台协同闭环：</strong>用 <strong>Issue Artifacts</strong> 沉淀规划 → 用 <strong>Stacked PRs</strong> 小步快跑提交 → 用 <strong>CLI <code>--attach</code></strong> 附上视觉验证证据。</div>
+                        <a href="https://github.com/events/universe/recap" target="_blank">官方回顾：GitHub Universe 2026 Recap →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 09: UPDATES #11 & #12 — SECURITY EXTENSION & AI SCAN
+                 ========================================== -->
+            <section class="slide" data-slide="9">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 03 · AI-NATIVE SECURITY</span>
+                            <span class="badge badge-teal">UPDATES #11 &amp; #12 · SECURITY EXTENSION &amp; AI SCAN</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 09 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">11 &amp; 12. 安全画布扩展与<span>全仓按需 AI 漏洞扫描</span></h2>
+                        <div class="slide-subtitle">
+                            将安全从事后修补前移至编码当下，并突破静态规则边界：在 Copilot App 内闭环修复告警，用 <strong>AI Scan</strong> 扫描全仓深层漏洞。
+                        </div>
+                    </div>
+
+                    <div class="grid-2 reveal d2" style="height: 635px;">
+                        <!-- Left: Update #11 Security Extension for Copilot App -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <span class="badge">UPDATE #11 · SECURITY EXTENSION (PUBLIC PREVIEW)</span>
+                                    <span style="font-family: var(--font-mono); font-size: 12.5px; color: var(--sky); font-weight: 700;">SECURITY CANVAS</span>
+                                </div>
+                                <div class="float-title" style="font-size: 25px;">Security Extension：在 Copilot App 内一站式审查与修复告警</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    无需在浏览器 <code>github.com</code> 告警页与本地编辑器之间来回切换，在专属 <strong>Security Canvas（安全画布）</strong> 中同时检视存量告警与本地增量代码。
+                                </p>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>存量 Code Scanning 告警闭环：</strong>按严重程度浏览、搜索与筛选仓库告警；选中单条或多条告警即可让 Copilot <strong>Explain（解释成因）</strong> 或 <strong>Fix（生成修复）</strong>。修复仅写入本地工作区，不自动 Commit/Push，由开发者审阅确认。</div>
+                                <div class="tag-item"><strong>提交前主动运行 <code>/security-review</code>：</strong>在发起 PR 前对本地未提交变更运行安全审查，新发现的风险与存量告警同屏展示；当本地代码再次改动时自动提醒重新复查。</div>
+                                <div class="tag-item"><strong>防重工与审批流集成：</strong>直观展示告警已关联的 PR（避免多人重复修同一漏洞）；支持直接 Dismiss 告警并无缝对接企业的 Delegated Alert Dismissal 审批流。</div>
+                                <div class="tag-item"><strong>一键安装命令：</strong>终端执行 <code>copilot plugin install github-security@awesome-copilot</code> 或在 App 的 <code>Customize</code> 中搜索 <code>github-security</code> 安装（浏览与忽略告警不消耗 AI Credits）。</div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Update #12 AI Scan for Repositories -->
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 10px;">
+                                    <span class="badge badge-teal">UPDATE #12 · AI SCAN FOR REPOSITORIES (PUBLIC PREVIEW)</span>
+                                    <span style="font-family: var(--font-mono); font-size: 12.5px; color: #38BDF8; font-weight: 700;">BEYOND CODEQL &amp; PR DIFFS</span>
+                                </div>
+                                <div class="float-title" style="font-size: 25px;">AI Scan for Repositories：覆盖任意语言的全仓智能体漏洞猎手</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    从仅扫描 PR 增量变更扩展至<strong>全仓库默认分支最新 Commit 的按需扫描</strong>，发现静态规则难以捕捉的复杂漏洞。
+                                </p>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>突破语言与静态规则限制：</strong>既能扫描 <strong>CodeQL 尚未支持的编程语言与框架</strong>，也能在 CodeQL 已支持的语言中利用 Agentic 探索能力挖掘跨文件业务逻辑漏洞。</div>
+                                <div class="tag-item"><strong>智能去重与固定成本预算：</strong>每个扫描任务在<strong>固定时间预算（Fixed time budget）</strong>内聚焦高风险代码区域，确保费用可控；与 CodeQL 同开时<strong>自动跳过 CodeQL 已报告的问题</strong>。</div>
+                                <div class="tag-item"><strong>无缝融入现有安全工作流：</strong>结果直接汇入 GitHub Code Scanning 告警列表，支持指派责任人、加入 Security Campaigns 或一键派发给 <strong>Agentic Autofix</strong> 批量修复（合并修复后重新触发扫描即可核验关闭）。</div>
+                                <div class="tag-item"><strong>无需 Copilot 席位许可证：</strong>面向所有公共仓库及开启了 GitHub Code Security / Advanced Security 的企业私有/内部仓库开放，按 Code Security AI Credits 计费并支持设置 SKU 级预算上限。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>双剑合璧：</strong>编码阶段用 <strong>Security Extension</strong> 实时运行 <code>/security-review</code> 拦截增量风险；存量代码库用 <strong>AI Scan</strong> 深度清扫历史死角。</div>
+                        <a href="https://github.blog/changelog/2026-10-28-ai-scan-for-repositories-in-public-preview/" target="_blank">官方文档：AI Scan for Repositories →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 10: UPDATES #13 & #14 — PUSH PROTECTION & SUPPLY CHAIN
+                 ========================================== -->
+            <section class="slide" data-slide="10">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 03 · SECRET &amp; SUPPLY CHAIN DEFENSE</span>
+                            <span class="badge badge-teal">UPDATES #13 &amp; #14 · PUSH PROTECTION &amp; PACKAGE FIREWALL</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 10 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">13 &amp; 14. AI 密钥推送拦截与<span>软件供应链防火墙</span></h2>
+                        <div class="slide-subtitle">
+                            当 AI 智能体自主编写代码并安装第三方依赖包时，必须拦截<strong>无固定格式的自定义凭据泄露</strong>与<strong>恶意依赖包投毒</strong>，并消除无效漏洞噪音。
+                        </div>
+                    </div>
+
+                    <div class="grid-3 reveal d2" style="height: 635px;">
+                        <!-- Update #13: AI Secret Detection in Push Protection -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num">13</div>
+                                    <span class="badge">AI SECRET PUSH PROTECTION</span>
+                                </div>
+                                <div class="float-title">Push Protection AI 密钥检测：拦截正则漏掉的非结构化机密</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    传统密钥扫描依赖固定前缀（如 <code>ghp_</code>、<code>AKIA</code>）和正则表达式，难以识别高熵自定义密码或内部私有凭据。
+                                </p>
+                            </div>
+
+                            <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; color: #991B1B; line-height: 1.55;">
+                                remote: — PUSH PROTECTION —<br/>
+                                remote: AI Secret Detection blocked unstructured password in <code>config/db.env:14</code>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>AI 语义与上下文识别：</strong>利用 AI 模型在 <code>git push</code> 阶段实时识别无固定格式的密码、连接串与非结构化机密（Unstructured secrets）。</div>
+                                <div class="tag-item"><strong>人机代码双重守护：</strong>无论是人类开发者手写还是 AI 智能体自动生成的代码，均在推送入库前被强制阻断（需同时开启 Push Protection 与 AI Secret Detection）。</div>
+                            </div>
+                        </div>
+
+                        <!-- Update #14A: Package Firewall -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num teal">14A</div>
+                                    <span class="badge badge-teal">PACKAGE FIREWALL</span>
+                                </div>
+                                <div class="float-title">Package Firewall：在安装前阻断恶意与高风险 npm 包</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    将供应链安全从事后发告警前移至<strong>包管理器下载安装的那一刻</strong>，防止投毒脚本执行。
+                                </p>
+                            </div>
+
+                            <div style="background: var(--slide-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; color: var(--navy); line-height: 1.55;">
+                                [Blocked Targets]<br/>
+                                • AI Coding Agents (Cloud / Local)<br/>
+                                • GitHub Actions CI Runners<br/>
+                                • Developer Local IDEs
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>事前主动拦截：</strong>当 AI 智能体、CI 构建 Runner 或开发者本地 IDE 尝试安装恶意（Malicious）或高风险 npm 软件包时，防火墙直接阻断下载。</div>
+                                <div class="tag-item"><strong>防范幻觉包与供应链投毒：</strong>有效防止智能体在自主装包时引入恶意抢注包或被劫持版本。</div>
+                            </div>
+                        </div>
+
+                        <!-- Update #14B: Reachability Analysis -->
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <div class="step-num dark">14B</div>
+                                    <span class="badge badge-teal">REACHABILITY ANALYSIS</span>
+                                </div>
+                                <div class="float-title">Reachability Analysis：函数级调用可达性分析，只修真正有风险的漏洞</div>
+                                <p class="float-lead" style="margin-top: 6px;">
+                                    解决依赖树中成百上千条 Dependabot 告警不知从何修起的痛点。
+                                </p>
+                            </div>
+
+                            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; color: #E2E8F0; line-height: 1.55;">
+                                Dependency CVE-2026-XXXX<br/>
+                                ↳ Vulnerable fn: <code>parseUnsafeXml()</code><br/>
+                                ↳ <span style="color: #2DD4BF; font-weight: 700;">Call Path Detected in src/ingest.js:88</span>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>精准识别真实调用路径：</strong>深度分析你的 JavaScript 业务代码是否<strong>真正直接或间接调用了</strong>第三方依赖包中含有漏洞的具体函数。</div>
+                                <div class="tag-item"><strong>大幅降噪聚焦高优修复：</strong>把真正可被触发的漏洞置顶处理，避免团队在从未被调用的死代码依赖升级上浪费精力。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>三位一体供应链防线：</strong>入库前用 <strong>AI Push Protection</strong> 锁死机密 → 装包时用 <strong>Package Firewall</strong> 拒止投毒 → 修复时用 <strong>Reachability Analysis</strong> 精准排优。</div>
+                        <a href="https://github.com/events/universe/recap" target="_blank">官方回顾：GitHub Security Releases →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 11: UPDATES #15 & #16 — ENTERPRISE BILLING & AGENT-SCALE INFRA
+                 ========================================== -->
+            <section class="slide" data-slide="11">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">PART 04 · COMMERCIAL &amp; INFRASTRUCTURE FOUNDATION</span>
+                            <span class="badge badge-teal">UPDATES #15 &amp; #16 · ENTERPRISE ACCESS &amp; GIT ARCHITECTURE</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 11 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">15 &amp; 16. 企业免独立订阅模式与<span>智能体级基础设施重构</span></h2>
+                        <div class="slide-subtitle">
+                            扫清企业规模化普及的商业与技术障碍：<strong>GitHub Enterprise 客户无需再单独采购 Copilot 席位订阅</strong>；底层扩容 400 万核并重构 Git 架构。
+                        </div>
+                    </div>
+
+                    <div class="grid-2 reveal d2" style="height: 635px;">
+                        <!-- Left: Update #15 Enterprise Subscription Change -->
+                        <div class="float-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <span class="badge">UPDATE #15 · FRICTIONLESS ENTERPRISE ADOPTION</span>
+                                    <span style="font-family: var(--font-mono); font-size: 13px; color: var(--sky); font-weight: 700;">PAY-AS-YOU-GO AI CREDITS</span>
+                                </div>
+                                <div class="float-title" style="font-size: 26px;">GitHub Enterprise 免独立订阅即可全员使用全部 Copilot 功能</div>
+                                <p class="float-lead" style="margin-top: 8px;">
+                                    即日起，GitHub Enterprise 客户无需再为每位员工单独购买额外的 Copilot 席位许可证（Separate subscription），只需为实际消耗的 <strong>AI Credits（AI 额度）</strong> 付费。
+                                </p>
+                            </div>
+
+                            <div class="tag-list" style="gap: 12px;">
+                                <div class="tag-item">
+                                    <strong>全功能一步解锁：</strong>直接涵盖 <strong>GitHub Copilot App、Copilot Code Review、Copilot Automations、Copilot Projects、Copilot Fusion</strong> 等全栈能力。
+                                </div>
+                                <div class="tag-item">
+                                    <strong>按实际价值与用量付费：</strong>彻底解决企业“先给谁买席位、低频用户席位闲置浪费”的采购博弈，让组织内每一位研发、测试、安全与产品人员都能按需调用 Agent。
+                                </div>
+                                <div class="tag-item">
+                                    <strong>平滑过渡与开放生态：</strong>目前已通过 GitHub Sales 开放办理，自助开通（Self-serve）即将上线；现有 Copilot Business 与 Copilot Enterprise 客户可保留原计划或按需平滑迁移。
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Update #16 Agent-Scale Infrastructure & Git Architecture -->
+                        <div class="float-card navy-card" style="justify-content: space-between;">
+                            <div>
+                                <div class="card-top" style="margin-bottom: 12px;">
+                                    <span class="badge badge-teal">UPDATE #16 · AGENT-SCALE INFRASTRUCTURE</span>
+                                    <span style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8; font-weight: 700;">AZURE MULTI-REGION + NEW GIT</span>
+                                </div>
+                                <div class="float-title" style="font-size: 26px;">支撑百万智能体并发的算力扩容与新一代 Git 架构</div>
+                                <p class="float-lead" style="margin-top: 8px;">
+                                    未来 5 年编写的软件将超过人类历史总和的 100 倍。为应对智能体全天候高频克隆、分支与并发验证，GitHub 完成了大规模硬件扩容与架构演进。
+                                </p>
+                            </div>
+
+                            <!-- Capacity KPI Strip -->
+                            <div class="grid-3" style="gap: 12px;">
+                                <div style="background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px; text-align: center;">
+                                    <div style="font-family: var(--font-display); font-size: 28px; font-weight: 900; color: #38BDF8;">+400万</div>
+                                    <div style="font-size: 13px; color: #CBD5E1; margin-top: 4px;">年度新增 CPU 核心</div>
+                                </div>
+                                <div style="background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px; text-align: center;">
+                                    <div style="font-family: var(--font-display); font-size: 28px; font-weight: 900; color: #2DD4BF;">+160 PB</div>
+                                    <div style="font-size: 13px; color: #CBD5E1; margin-top: 4px;">新增高速存储容量</div>
+                                </div>
+                                <div style="background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 14px; text-align: center;">
+                                    <div style="font-family: var(--font-display); font-size: 28px; font-weight: 900; color: #FCD34D;">+50 Tb/s</div>
+                                    <div style="font-size: 13px; color: #CBD5E1; margin-top: 4px;">新增网络吞吐带宽</div>
+                                </div>
+                            </div>
+
+                            <div class="tag-list">
+                                <div class="tag-item"><strong>向 Azure 多区域部署（Multi-region deployment）迁移：</strong>在承载全球海量流量的同时稳步推进多区域高可用迁移，预计于 2027 年初全面完成。</div>
+                                <div class="tag-item"><strong>新一代 Agent-Scale Git 架构三大原则：</strong><br/>
+                                    1. <strong>简化底层原语（Simplify primitives）</strong>；2. <strong>计算与存储解耦（Decouple storage from compute）</strong>；3. <strong>最小化分布式协调开销（Minimize coordination）</strong>，连同 AI Gateway 与多模型 Harness 全面提速。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>战略意义：</strong>商业上消除了“席位墙”，架构上消除了“并发墙”，为企业全面迈入 Agentic SDLC 铺平道路。</div>
+                        <a href="https://github.blog/news-insights/company-news/github-universe-2026-evolving-every-layer-of-the-stack/" target="_blank">官方博客：Evolving Every Layer of the Stack →</a>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 12: MASTER MATRIX & ACTION ROADMAP
+                 ========================================== -->
+            <section class="slide" data-slide="12">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">EXECUTIVE SUMMARY &amp; CHEAT SHEET</span>
+                            <span class="badge badge-teal">ALL 16 RELEASES AT A GLANCE</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 12 / 12</div>
+                    </header>
+
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">GitHub Universe 2026 <span>16 项发布速查矩阵与落地建议</span></h2>
+                        <div class="slide-subtitle">
+                            一页总览全部 16 项发布的状态、核心定位与企业落地优先级，助力技术团队快速规划升级路径。
+                        </div>
+                    </div>
+
+                    <!-- 16-Item Compact Matrix Grid (4x4) -->
+                    <div class="grid-4 reveal d2" style="gap: 14px; height: 500px;">
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#01 · WORKBENCH</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">GA / Preview</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Copilot App &amp; Computer Use</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">统一端到端工作台，内置自然语言生图，并支持授权操控 macOS/Win 桌面 GUI 应用。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#02 · COORDINATION</span>
+                                <span class="badge badge-amber" style="font-size: 11px; padding: 2px 8px;">Public Preview</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Copilot Projects</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">围绕业务目标协调跨多仓库或无仓库并行会话，配备共享 Library、状态看板与周期任务。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--teal); font-weight: 700;">#03 · MODEL ROUTER</span>
+                                <span class="badge badge-teal" style="font-size: 11px; padding: 2px 8px;">GA</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Copilot Fusion</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">Single/Cascade/Critique 三模式运行时路由，Max 档比肩顶尖模型且成本降 50%、耗时降 40%。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--teal); font-weight: 700;">#04 · WORKFLOWS</span>
+                                <span class="badge badge-teal" style="font-size: 11px; padding: 2px 8px;">GA</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Automations &amp; Agentic Workflows</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">支持定时/事件/API 触发的个人与团队共享云端自动化，具备从运行结果自我进化提案能力。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#05 · HANDOFF</span>
+                                <span class="badge badge-teal" style="font-size: 11px; padding: 2px 8px;">GA</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Session Continuity</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">在手机端、VS Code、Copilot App、CLI 与网页端无缝接力并实时引导同一个云端会话。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--teal); font-weight: 700;">#06 · QUALITY GATE</span>
+                                <span class="badge badge-teal" style="font-size: 11px; padding: 2px 8px;">GA / Preview</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Copilot Code Review Max</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">ReviewBench 高危检出率第一；全仓上下文采集、一键转交 Cloud Agent 修复、支持无证成员使用。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#07 · MCP HUB</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">New</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Copilot Connectors</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">一次认证 Vercel、Cloudflare、Sentry 等服务，由 GitHub 托管 MCP 并自动同步至全端。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#08 · PR WORKFLOW</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">New</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Stacked Pull Requests</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">将大特性拆分为相互关联的小型 PR 栈，支持逐层独立审查并在通过后一键合并整栈。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#09 · CONTEXT</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">New</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Issue Artifacts</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">在 Issue 上直接挂载实施方案（Plan）、调研报告与链接，让设计脉络与工单永久随行。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--sky); font-weight: 700;">#10 · CLI &amp; TRIAGE</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">New</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">CLI <code>--attach</code> &amp; PR 视图</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">终端通过可重复 <code>--attach</code> 内联上传图片/视频；全新仓库 PR 视图高亮需优先响应的变更。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--amber); font-weight: 700;">#11 · APP SECURITY</span>
+                                <span class="badge badge-amber" style="font-size: 11px; padding: 2px 8px;">Public Preview</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Security Extension 画布</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">在 Copilot App 内浏览 Code Scanning 告警、一键解释与本地修复，并在提 PR 前运行 <code>/security-review</code>。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--amber); font-weight: 700;">#12 · REPO SECURITY</span>
+                                <span class="badge badge-amber" style="font-size: 11px; padding: 2px 8px;">Public Preview</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">AI Scan for Repositories</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">按需全仓 AI 漏洞扫描，覆盖 CodeQL 未支持语言并自动去重，无需 Copilot 许可证即可启用。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--amber); font-weight: 700;">#13 · SECRET GUARD</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">New</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">AI Secret Push Protection</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">利用 AI 识别正则无法匹配的自定义密码等非结构化机密，在 <code>git push</code> 时实时阻断泄露。</div>
+                        </div>
+
+                        <div class="float-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: var(--amber); font-weight: 700;">#14 · SUPPLY CHAIN</span>
+                                <span class="badge" style="font-size: 11px; padding: 2px 8px;">New</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Package Firewall &amp; 可达性分析</div>
+                            <div style="font-size: 13px; color: var(--slate); line-height: 1.42;">在 Agent/Runner/IDE 安装前拦截恶意 npm 包；分析 JS 代码真实调用链以优先修复可达漏洞。</div>
+                        </div>
+
+                        <div class="float-card navy-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: #38BDF8; font-weight: 700;">#15 · LICENSING</span>
+                                <span class="badge badge-teal" style="font-size: 11px; padding: 2px 8px;">Available Now</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Enterprise 免独立订阅</div>
+                            <div style="font-size: 13px; color: #CBD5E1; line-height: 1.42;">GitHub Enterprise 客户无需再买独立 Copilot 席位，全员可用全部功能，仅按 AI Credits 用量付费。</div>
+                        </div>
+
+                        <div class="float-card navy-card" style="padding: 14px 18px; gap: 6px; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family: var(--font-mono); font-size: 12px; color: #2DD4BF; font-weight: 700;">#16 · INFRASTRUCTURE</span>
+                                <span class="badge badge-teal" style="font-size: 11px; padding: 2px 8px;">Architecture</span>
+                            </div>
+                            <div style="font-size: 16.5px; font-weight: 800;">Agent-Scale Git 与云底座</div>
+                            <div style="font-size: 13px; color: #CBD5E1; line-height: 1.42;">扩容 400 万核 / 160 PB 存储 / 50 Tb/s 网络，推进 Azure 多区域部署与计算存储解耦的新 Git 架构。</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Plan Banner -->
+                    <div class="hero-card reveal d3" style="padding: 16px 28px; background: var(--navy); color: #FFFFFF; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 16px;">
+                            <strong style="color: #38BDF8;">企业三步落地路线图：</strong>
+                            <span style="color: #E2E8F0; margin-left: 10px;">① 默认切换至 <strong>Copilot Fusion</strong> 并安装 <strong>Security Extension</strong></span>
+                            <span style="color: #38BDF8; margin: 0 10px;">→</span>
+                            <span style="color: #E2E8F0;">② 核心仓启用 <strong>Code Review Max + AI Scan + Push Protection</strong></span>
+                            <span style="color: #2DD4BF; margin: 0 10px;">→</span>
+                            <span style="color: #E2E8F0;">③ 以 <strong>Copilot Projects + Shared Automations</strong> 跑通跨仓目标交付</span>
+                        </div>
+                        <span class="badge badge-teal">READY FOR AGENTIC SDLC</span>
+                    </div>
+
+                    <footer class="bottom-strip">
+                        <div><strong>提示：</strong>将鼠标移至左上角或按键盘 <code>E</code> 键可进入内联文本编辑模式，按 <code>Ctrl+S / Cmd+S</code> 可导出修改后的独立 HTML 文件。</div>
+                        <a href="index.html">← 返回演示文稿首页 (Index)</a>
+                    </footer>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Presentation Navigation Controls -->
+    <div class="deck-controls">
+        <div class="deck-nav-pill">
+            <button class="nav-btn" id="prevBtn" aria-label="Previous slide">PREV</button>
+            <div class="nav-progress-track">
+                <div class="nav-progress-fill" id="progressFill"></div>
+            </div>
+            <span id="slideCounter">01 / 12</span>
+            <button class="nav-btn" id="nextBtn" aria-label="Next slide">NEXT</button>
+            <span class="nav-divider" aria-hidden="true"></span>
+            <button class="nav-btn fullscreen-btn" id="fullscreenBtn" aria-label="Toggle fullscreen presentation" title="快捷键: F">
+                <svg id="fsIconExpand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                <svg id="fsIconCompress" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <polyline points="4 14 10 14 10 20"></polyline>
+                    <polyline points="20 10 14 10 14 4"></polyline>
+                    <line x1="14" y1="10" x2="21" y2="3"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                <span id="fsBtnText">全屏播放</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+/* ===========================================
+   FIXED 16:9 STAGE SCALER & SLIDE CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.stage = document.getElementById('deckStage');
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.prevBtn = document.getElementById('prevBtn');
+        this.nextBtn = document.getElementById('nextBtn');
+        this.fullscreenBtn = document.getElementById('fullscreenBtn');
+        this.fsIconExpand = document.getElementById('fsIconExpand');
+        this.fsIconCompress = document.getElementById('fsIconCompress');
+        this.fsBtnText = document.getElementById('fsBtnText');
+        this.counter = document.getElementById('slideCounter');
+        this.progressFill = document.getElementById('progressFill');
+        this.currentIndex = 0;
+        this.total = this.slides.length;
+
+        this.init();
+    }
+
+    init() {
+        this.setupStageScale();
+        window.addEventListener('resize', () => this.setupStageScale());
+
+        const initialHash = parseInt(window.location.hash.replace('#slide-', ''), 10);
+        if (!isNaN(initialHash) && initialHash >= 1 && initialHash <= this.total) {
+            this.currentIndex = initialHash - 1;
+        }
+
+        this.render();
+        this.bindEvents();
+    }
+
+    setupStageScale() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const scale = Math.min(vw / 1920, vh / 1080);
+        const offsetX = (vw - 1920 * scale) / 2;
+        const offsetY = (vh - 1080 * scale) / 2;
+        this.stage.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    }
+
+    bindEvents() {
+        this.prevBtn.addEventListener('click', () => this.prev());
+        this.nextBtn.addEventListener('click', () => this.next());
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+
+        const syncFsState = () => this.updateFullscreenUI();
+        document.addEventListener('fullscreenchange', syncFsState);
+        document.addEventListener('webkitfullscreenchange', syncFsState);
+
+        window.addEventListener('keydown', (e) => {
+            if (document.body.classList.contains('editing-active')) return;
+            if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+                e.preventDefault();
+                this.next();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                this.goTo(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                this.goTo(this.total - 1);
+            } else if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                e.preventDefault();
+                this.toggleFullscreen();
+            }
+        });
+
+        let touchStartX = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) this.next();
+                else this.prev();
+            }
+        }, { passive: true });
+    }
+
+    toggleFullscreen() {
+        const docEl = document.documentElement;
+        const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+        if (!isFs) {
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen().catch(() => {});
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    }
+
+    updateFullscreenUI() {
+        const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        if (this.fsIconExpand && this.fsIconCompress && this.fsBtnText) {
+            this.fsIconExpand.style.display = isFs ? 'none' : 'block';
+            this.fsIconCompress.style.display = isFs ? 'block' : 'none';
+            this.fsBtnText.textContent = isFs ? '退出全屏' : '全屏播放';
+        }
+        this.setupStageScale();
+    }
+
+    goTo(index) {
+        if (index < 0 || index >= this.total) return;
+        this.currentIndex = index;
+        this.render();
+    }
+
+    next() {
+        if (this.currentIndex < this.total - 1) {
+            this.currentIndex++;
+            this.render();
+        }
+    }
+
+    prev() {
+        if (this.currentIndex > 0) {
+            this.currentIndex--;
+            this.render();
+        }
+    }
+
+    render() {
+        this.slides.forEach((slide, idx) => {
+            slide.classList.toggle('active', idx === this.currentIndex);
+        });
+        const num = String(this.currentIndex + 1).padStart(2, '0');
+        const tot = String(this.total).padStart(2, '0');
+        this.counter.textContent = `${num} / ${tot}`;
+        this.progressFill.style.transform = `scaleX(${(this.currentIndex + 1) / this.total})`;
+        window.history.replaceState(null, '', `#slide-${this.currentIndex + 1}`);
+        this.animateCounters(this.slides[this.currentIndex]);
+    }
+
+    animateCounters(activeSlide) {
+        if (!activeSlide || document.body.classList.contains('editing-active')) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const candidates = activeSlide.querySelectorAll('.step-num');
+        candidates.forEach((el) => {
+            if (!el.dataset.origText) {
+                el.dataset.origText = el.textContent.trim();
+            }
+            const raw = el.dataset.origText;
+            if (!/^\d+$/.test(raw)) return;
+
+            const target = parseInt(raw, 10);
+            const padLen = raw.startsWith('0') ? raw.length : 0;
+            const duration = 650;
+            const start = performance.now();
+
+            const tick = (now) => {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 4);
+                const current = Math.round(target * eased);
+                el.textContent = padLen ? String(current).padStart(padLen, '0') : String(current);
+                if (progress < 1) {
+                    requestAnimationFrame(tick);
+                } else {
+                    el.textContent = raw;
+                }
+            };
+            requestAnimationFrame(tick);
+        });
+    }
+}
+
+/* ===========================================
+   INLINE DECK EDITOR (HOVER TOP-LEFT OR PRESS E)
+   =========================================== */
+class InlineDeckEditor {
+    constructor() {
+        this.hotzone = document.getElementById('editHotzone');
+        this.toggleBtn = document.getElementById('editToggle');
+        this.storageKey = 'github-universe-2026-nordic-edits-v1';
+        this.isEditing = false;
+        this.hideTimeout = null;
+        this.editableElements = [];
+
+        this.init();
+    }
+
+    init() {
+        const selectors = 'h1, h2, h3, p, .float-title, .float-lead, .tag-item, .slide-subtitle, .bottom-strip div:first-child';
+        this.editableElements = Array.from(document.querySelectorAll(selectors));
+        this.editableElements.forEach((el, idx) => {
+            el.dataset.editable = 'true';
+            el.dataset.editId = `edit-${idx}`;
+        });
+
+        this.restoreEdits();
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.hotzone.addEventListener('mouseenter', () => {
+            clearTimeout(this.hideTimeout);
+            this.toggleBtn.classList.add('visible');
+        });
+        this.hotzone.addEventListener('mouseleave', () => {
+            this.hideTimeout = setTimeout(() => {
+                if (!this.isEditing) this.toggleBtn.classList.remove('visible');
+            }, 400);
+        });
+        this.toggleBtn.addEventListener('mouseenter', () => clearTimeout(this.hideTimeout));
+        this.toggleBtn.addEventListener('mouseleave', () => {
+            this.hideTimeout = setTimeout(() => {
+                if (!this.isEditing) this.toggleBtn.classList.remove('visible');
+            }, 400);
+        });
+
+        this.toggleBtn.addEventListener('click', () => this.toggleEditMode());
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'INPUT' && !document.activeElement.isContentEditable) {
+                e.preventDefault();
+                this.toggleEditMode();
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+                this.saveEdits();
+                this.exportStandaloneHTML();
+            }
+        });
+
+        this.editableElements.forEach((el) => {
+            el.addEventListener('input', () => this.saveEdits());
+        });
+    }
+
+    toggleEditMode() {
+        this.isEditing = !this.isEditing;
+        document.body.classList.toggle('editing-active', this.isEditing);
+        this.toggleBtn.classList.toggle('active', this.isEditing);
+        this.toggleBtn.textContent = this.isEditing ? 'DONE EDITING [CTRL+S SAVE]' : 'EDIT TEXT [E]';
+
+        this.editableElements.forEach((el) => {
+            el.contentEditable = this.isEditing ? 'true' : 'false';
+        });
+    }
+
+    saveEdits() {
+        const data = {};
+        this.editableElements.forEach((el) => {
+            data[el.dataset.editId] = el.innerHTML;
+        });
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(data));
+        } catch (err) {
+            console.warn('Could not persist edits to localStorage', err);
+        }
+    }
+
+    restoreEdits() {
+        try {
+            const raw = localStorage.getItem(this.storageKey);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            this.editableElements.forEach((el) => {
+                if (data[el.dataset.editId] !== undefined) {
+                    el.innerHTML = data[el.dataset.editId];
+                }
+            });
+        } catch (err) {
+            console.warn('Could not restore edits', err);
+        }
+    }
+
+    exportStandaloneHTML() {
+        const clone = document.documentElement.cloneNode(true);
+        clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+        clone.querySelector('body').classList.remove('editing-active');
+        const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'github-universe-2026-releases.html';
+        a.click();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new SlidePresentation();
+    new InlineDeckEditor();
+});
+    </script>
+</body>
+</html>
