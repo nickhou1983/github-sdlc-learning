@@ -1397,6 +1397,97 @@ body.editing-active [data-editable="true"] {
     overflow-wrap: anywhere;
 }
 
+/* === GITHUB INTELLIGENCE: CONTEXT AND CONTINUOUS LEARNING === */
+.intelligence-body {
+    display: grid;
+    grid-template-rows: 350px 112px 86px;
+    gap: 20px;
+}
+
+.intelligence-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.intelligence-card {
+    padding: 28px 30px;
+    justify-content: space-between;
+}
+
+.intelligence-card h3 {
+    font-size: 30px;
+    line-height: 1.25;
+}
+
+.intelligence-card .float-lead {
+    font-size: 23px;
+    line-height: 1.5;
+}
+
+.intelligence-example {
+    padding: 15px 18px;
+    border-radius: 12px;
+    background: var(--sky-soft);
+    color: var(--slate);
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+.intelligence-loop {
+    display: grid;
+    grid-template-columns: 220px 1fr 30px 1fr 30px 1fr 30px 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 26px;
+    border-radius: 16px;
+    background: var(--navy);
+    color: #FFFFFF;
+}
+
+.intelligence-loop-label {
+    color: #2DD4BF;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.intelligence-loop-step {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.intelligence-loop-step small {
+    display: block;
+    margin-top: 6px;
+    color: #CBD5E1;
+    font-size: 17px;
+    font-weight: 400;
+}
+
+.intelligence-loop-arrow {
+    color: #2DD4BF;
+    font-size: 25px;
+}
+
+.intelligence-policy {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 28px;
+    padding: 16px 24px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    font-size: 19px;
+    line-height: 1.5;
+}
+
+.platform-overview .bottom-strip,
+.intelligence-slide .bottom-strip {
+    margin-bottom: 36px;
+}
+
     </style>
 </head>
 <body>
@@ -1422,7 +1513,7 @@ body.editing-active [data-editable="true"] {
                             </div>
                             <span class="badge" style="background: rgba(45, 212, 191, 0.16); color: #5EEAD4; border: 1px solid rgba(45, 212, 191, 0.35);">CIO &amp; VP OF ENGINEERING BRIEFING</span>
                         </div>
-                        <div class="page-indicator" style="background: rgba(15, 23, 42, 0.8); color: #94A3B8; border-color: rgba(148, 163, 184, 0.28);">01 / 34</div>
+                        <div class="page-indicator" style="background: rgba(15, 23, 42, 0.8); color: #94A3B8; border-color: rgba(148, 163, 184, 0.28);">01 / 33</div>
                     </header>
 
                     <!-- Main Center Split -->
@@ -1446,9 +1537,9 @@ body.editing-active [data-editable="true"] {
 
                             <div class="cover-kpi-row reveal d3">
                                 <div class="cover-kpi-card">
-                                    <div class="cover-kpi-num" style="font-size: 42px;">06<span> 层</span></div>
+                                    <div class="cover-kpi-num" style="font-size: 42px;">07<span> 层</span></div>
                                     <div class="cover-kpi-label">全栈平台能力底座</div>
-                                    <div class="cover-kpi-desc">统一上下文 · 异步虚拟团队 · 纵深安全与自愈</div>
+                                    <div class="cover-kpi-desc" data-edit-revision="intelligence">统一上下文 · 持续学习 · 纵深安全与自愈</div>
                                 </div>
                                 <div class="cover-kpi-card teal">
                                     <div class="cover-kpi-num" style="font-size: 42px;">80<span> / 20</span></div>
@@ -1520,7 +1611,7 @@ body.editing-active [data-editable="true"] {
                                     <circle cx="360" cy="340" r="82" fill="#1E293B" stroke="rgba(45, 212, 191, 0.45)" stroke-width="1.5"/>
                                     <text x="360" y="316" text-anchor="middle" fill="#38BDF8" font-family="IBM Plex Mono" font-size="12" font-weight="700">SYSTEM OF RECORD</text>
                                     <text x="360" y="343" text-anchor="middle" fill="#FFFFFF" font-family="Noto Sans SC" font-size="20" font-weight="900">GitHub 统一底座</text>
-                                    <text x="360" y="368" text-anchor="middle" fill="#5EEAD4" font-family="Noto Sans SC" font-size="13" font-weight="700">7-in-1 Context · Agent HQ</text>
+                                    <text x="360" y="368" text-anchor="middle" fill="#5EEAD4" font-family="Noto Sans SC" font-size="13" font-weight="700">Context · Intelligence · Agent HQ</text>
 
                                     <!-- NODE 1 (TOP): 需求契约与 Plan -->
                                     <g transform="translate(250, 74)">
@@ -1574,13 +1665,11 @@ body.editing-active [data-editable="true"] {
                             <span class="cover-agenda-pill">AGENDA</span>
                             <span>01 痛点破局</span>
                             <span style="color: #38BDF8;">➔</span>
-                            <span>02 六层平台底座</span>
+                            <span>02 七层平台底座</span>
                             <span style="color: #38BDF8;">➔</span>
-                            <span>03 七幕实战演示</span>
+                            <span>03 微软 VS Code 周更拆解</span>
                             <span style="color: #38BDF8;">➔</span>
-                            <span>04 微软 VS Code 周更拆解</span>
-                            <span style="color: #38BDF8;">➔</span>
-                            <span>05 4–6 周试点与技术附录</span>
+                            <span>04 4–6 周试点与技术附录</span>
                         </div>
                         <div style="font-family: var(--font-mono); font-size: 13.5px; color: #38BDF8; font-weight: 700;">
                             PRESS [→] OR [SPACE] TO START · [F] FULLSCREEN
@@ -1600,7 +1689,7 @@ body.editing-active [data-editable="true"] {
                             <span class="badge">CIO KEYNOTE EDITION</span>
                             <span class="badge badge-teal">AGENTIC SDLC PLATFORM</span>
                         </div>
-                        <div class="page-indicator">SLIDE 02 / 34</div>
+                        <div class="page-indicator">SLIDE 02 / 33</div>
                     </header>
 
                     <div class="hero-card reveal d1" style="display: grid; grid-template-columns: 980px 640px; gap: 48px; align-items: center; padding: 36px 46px;">
@@ -1720,7 +1809,7 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 02: THE BOTTLENECK
+                 SLIDE 03: THE BOTTLENECK
                  ========================================== -->
             <section class="slide" data-slide="3">
                 <div class="nordic-wrap">
@@ -1729,7 +1818,7 @@ body.editing-active [data-editable="true"] {
                             <span class="badge">PART 01 · STRATEGIC WHY</span>
                             <span class="badge badge-amber">BOTTLENECK VISUALIZATION</span>
                         </div>
-                        <div class="page-indicator">SLIDE 03 / 34</div>
+                        <div class="page-indicator">SLIDE 03 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -1821,42 +1910,42 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 03: 6-LAYER PLATFORM OVERVIEW
+                 SLIDE 04: 7-LAYER PLATFORM OVERVIEW
                  ========================================== -->
-            <section class="slide" data-slide="4">
+            <section class="slide platform-overview" data-slide="4">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">PART 02 · PLATFORM ARCHITECTURE</span>
-                            <span class="badge badge-teal">6-LAYER BLUEPRINT</span>
+                            <span class="badge badge-teal">7-LAYER BLUEPRINT</span>
                         </div>
-                        <div class="page-indicator">SLIDE 04 / 34</div>
+                        <div class="page-indicator">SLIDE 04 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
-                        <h2 class="slide-title">基于 GitHub 的 <span>六层核心平台架构全景图</span></h2>
-                        <div class="slide-subtitle">
-                            以<strong>统一工程上下文（2.1）</strong>为地基，向上贯通编排、验证、安全与生产自愈。
+                        <h2 class="slide-title" data-edit-revision="intelligence">基于 GitHub 的 <span>七层核心平台架构全景图</span></h2>
+                        <div class="slide-subtitle" data-edit-revision="intelligence">
+                            2.1 提供<strong>当前任务上下文</strong>，2.4 用 <strong>GitHub Intelligence</strong> 积累并更新工程经验。
                         </div>
                     </div>
 
                     <div class="reveal d2" style="display: grid; grid-template-columns: 1180px 544px; gap: 28px; height: 610px;">
                         <div class="float-card" style="padding: 24px 30px; justify-content: space-between; background: #FFFFFF;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <span style="font-family: var(--font-mono); font-size: 13px; color: var(--sky); font-weight: 700;">GITHUB AGENTIC SDLC CONTROL PLANE // 六层架构蓝图</span>
+                                <span style="font-family: var(--font-mono); font-size: 13px; color: var(--sky); font-weight: 700;">GITHUB AGENTIC SDLC CONTROL PLANE // 七层架构蓝图</span>
                                 <span class="badge badge-teal">END-TO-END STACK</span>
                             </div>
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                                 <div style="background: var(--navy); color: #FFF; border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; gap: 16px;">
-                                    <div class="step-num dark" style="width: 48px; height: 48px; flex-shrink: 0;">2.6</div>
+                                    <div class="step-num dark" style="width: 48px; height: 48px; flex-shrink: 0;">2.7</div>
                                     <div>
                                         <div style="font-size: 21px; font-weight: 900; color: #2DD4BF;">生产发布与运维自愈</div>
                                         <div style="font-size: 16px; color: #CBD5E1; margin-top: 2px;">Environment 灰度门禁 · SRE 告警自愈回流</div>
                                     </div>
                                 </div>
                                 <div style="background: #F0FDF4; border: 1.5px solid #14B8A6; border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; gap: 16px;">
-                                    <div class="step-num teal" style="width: 48px; height: 48px; flex-shrink: 0;">2.5</div>
+                                    <div class="step-num teal" style="width: 48px; height: 48px; flex-shrink: 0;">2.6</div>
                                     <div>
                                         <div style="font-size: 21px; font-weight: 900; color: var(--navy);">安全、质量与人类治理</div>
                                         <div style="font-size: 16px; color: var(--slate); margin-top: 2px;">沙箱隔离 · CodeQL/Autofix · 人工终审</div>
@@ -1864,15 +1953,21 @@ body.editing-active [data-editable="true"] {
                                 </div>
                             </div>
 
-                            <div style="background: linear-gradient(90deg, #E0F2FE 0%, #CCFBF1 100%); border: 1.5px solid var(--sky); border-radius: 14px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <div class="step-num" style="background: var(--navy); color: #38BDF8; width: 48px; height: 48px;">2.4</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div style="background: var(--sky-soft); border: 1.5px solid var(--sky); border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; gap: 16px;">
+                                    <div class="step-num" style="width: 48px; height: 48px; flex-shrink: 0;">2.5</div>
                                     <div>
-                                        <div style="font-size: 22px; font-weight: 900; color: var(--navy);">可执行、可验证的工程自动化（Agentic Workflow + Actions）</div>
-                                        <div style="font-size: 16.5px; color: var(--slate); margin-top: 2px;">确定性 CI/CD + AI 推理编排 · Playwright 实机验证</div>
+                                        <div style="font-size: 21px; font-weight: 900; color: var(--navy);">可执行、可验证的工程自动化</div>
+                                        <div style="font-size: 16px; color: var(--slate); margin-top: 2px;">Actions 推理编排 · Playwright 实机验证</div>
                                     </div>
                                 </div>
-                                <span class="badge badge-navy">CONTINUOUS AI</span>
+                                <div style="background: #CCFBF1; border: 2px solid var(--teal); border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; gap: 16px;">
+                                    <div class="step-num teal" style="width: 48px; height: 48px; flex-shrink: 0;">2.4</div>
+                                    <div>
+                                        <div style="font-size: 21px; font-weight: 900; color: var(--navy);">GitHub Intelligence · 持续学习</div>
+                                        <div style="font-size: 16px; color: var(--slate); margin-top: 2px;">Memory · Dreaming · Code Search</div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -1910,11 +2005,11 @@ body.editing-active [data-editable="true"] {
                                     <span class="badge badge-teal">PLATFORM SYNERGY</span>
                                     <span style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8;">WHY ONE PLATFORM</span>
                                 </div>
-                                <div class="float-title" style="font-size: 27px; margin-bottom: 18px;">为什么六层必须同平台？</div>
+                                <div class="float-title" data-edit-revision="intelligence" style="font-size: 27px; margin-bottom: 18px;">七层协同：从上下文到经验复用</div>
                                 <div class="tag-list" style="gap: 16px;">
-                                    <div class="tag-item"><strong>上下文零丢失：</strong>编码、测试与 SRE 共享同一图谱</div>
-                                    <div class="tag-item"><strong>自动化免搬运：</strong>直接复用现有 Actions 与权限</div>
-                                    <div class="tag-item"><strong>治理无死角：</strong>所有 Agent 合入均受统一门禁管控</div>
+                                    <div class="tag-item" data-edit-revision="intelligence"><strong>可信上下文：</strong>按权限检索代码与研发历史</div>
+                                    <div class="tag-item" data-edit-revision="intelligence"><strong>经验可复用：</strong>记忆与反思改善下一轮交付</div>
+                                    <div class="tag-item" data-edit-revision="intelligence"><strong>治理不旁路：</strong>测试与人工审批仍是强制关卡</div>
                                 </div>
                             </div>
                             <div style="background: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 18px 20px;">
@@ -1925,14 +2020,14 @@ body.editing-active [data-editable="true"] {
                     </div>
 
                     <footer class="bottom-strip">
-                        <div><strong>架构主线：</strong>2.1 可信上下文 ➔ 2.2/2.3 多智能体与开放生态 ➔ 2.4 自动验证 ➔ 2.5 安全门禁 ➔ 2.6 生产闭环。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">6-LAYER ARCHITECTURE BLUEPRINT</div>
+                        <div data-edit-revision="intelligence"><strong>架构主线：</strong>上下文 → 团队与生态 → 2.4 持续学习 → 2.5 工程验证 → 2.6 治理 → 2.7 生产闭环。</div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">7-LAYER ARCHITECTURE BLUEPRINT</div>
                     </footer>
                 </div>
             </section>
 
             <!-- ==========================================
-                 SLIDE 04: LAYER 2.1 - UNIFIED CONTEXT
+                 SLIDE 05: LAYER 2.1 - UNIFIED CONTEXT
                  ========================================== -->
             <section class="slide" data-slide="5">
                 <div class="nordic-wrap">
@@ -1941,7 +2036,7 @@ body.editing-active [data-editable="true"] {
                             <span class="badge">CAPABILITY 2.1</span>
                             <span class="badge badge-teal">UNIFIED SOFTWARE ENGINEERING CONTEXT</span>
                         </div>
-                        <div class="page-indicator">SLIDE 05 / 34</div>
+                        <div class="page-indicator">SLIDE 05 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -1983,7 +2078,7 @@ body.editing-active [data-editable="true"] {
                                 </div>
                             </div>
                             <div style="background: var(--navy); color: #FFFFFF; padding: 14px 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 6px;">
-                                <div style="font-size: 16px; color: #E2E8F0;"><strong style="color: #38BDF8;">Copilot Spaces：</strong>跨仓库组装微服务领域知识包</div>
+                                <div style="font-size: 16px; color: #E2E8F0;"><strong style="color: #38BDF8;">Copilot Project：</strong>跨仓库组装微服务领域知识包</div>
                                 <div style="font-size: 16px; color: #E2E8F0;"><strong style="color: #2DD4BF;">Copilot Memory：</strong>跨会话自动沉淀代码约定与排障记忆</div>
                             </div>
                         </div>
@@ -1991,7 +2086,7 @@ body.editing-active [data-editable="true"] {
                         <div class="float-card" style="padding: 24px 30px; position: relative; justify-content: space-between;">
                             <div class="card-top">
                                 <span class="badge badge-teal">GITHUB 7-IN-1 CONTEXT GRAPH · 七位一体可信上下文中枢</span>
-                                <span style="font-family: var(--font-mono); font-size: 13px; color: var(--teal);">SPACES · MEMORY · RBAC</span>
+                                <span style="font-family: var(--font-mono); font-size: 13px; color: var(--teal);">PROJECT · MEMORY · RBAC</span>
                             </div>
 
                             <svg width="1060" height="495" viewBox="0 0 1060 495" style="margin: 0 auto; display: block;">
@@ -2008,9 +2103,9 @@ body.editing-active [data-editable="true"] {
 
                                 <rect x="380" y="172" width="300" height="150" rx="20" fill="#0F172A" stroke="#38BDF8" stroke-width="3"/>
                                 <text x="530" y="206" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="700" fill="#38BDF8">UNIFIED CONTEXT ENGINE</text>
-                                <text x="530" y="236" text-anchor="middle" font-family="Noto Sans SC, sans-serif" font-size="21" font-weight="900" fill="#FFFFFF">可信工程上下文中枢</text>
+                                <text x="530" y="236" text-anchor="middle" font-family="Noto Sans SC, sans-serif" font-size="21" font-weight="900" fill="#FFFFFF">GitHub 数据关系网络</text>
                                 <rect x="400" y="252" width="124" height="28" rx="6" fill="#1E293B" stroke="#38BDF8" stroke-width="1.2"/>
-                                <text x="462" y="271" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="700" fill="#38BDF8">Copilot Spaces</text>
+                                <text x="462" y="271" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="700" fill="#38BDF8">Copilot Project</text>
                                 <rect x="536" y="252" width="124" height="28" rx="6" fill="#1E293B" stroke="#2DD4BF" stroke-width="1.2"/>
                                 <text x="598" y="271" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="700" fill="#2DD4BF">Copilot Memory</text>
                                 <text x="530" y="304" text-anchor="middle" font-family="Noto Sans SC, sans-serif" font-size="13" fill="#CBD5E1">跨仓知识空间 · 跨会话记忆沉淀</text>
@@ -2047,14 +2142,14 @@ body.editing-active [data-editable="true"] {
                     </div>
 
                     <footer class="bottom-strip">
-                        <div><strong>核心壁垒：</strong>单点插件只看得到当前文件；GitHub 拥有从需求、安全到生产的完整工程记忆。</div>
+                        <div data-edit-revision="intelligence"><strong>职责边界：</strong>2.1 按任务组装可信证据；2.4 GitHub Intelligence 进一步检索、记忆并更新工程经验。</div>
                         <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.1 · 7 UNIFIED CONTEXT SOURCES</div>
                     </footer>
                 </div>
             </section>
 
             <!-- ==========================================
-                 SLIDE 05: LAYER 2.2 - 4-STAGE EVOLUTION & ASYNC AGENT TEAM
+                 SLIDE 06: LAYER 2.2 - 4-STAGE EVOLUTION & ASYNC AGENT TEAM
                  ========================================== -->
             <section class="slide" data-slide="6">
                 <div class="nordic-wrap">
@@ -2063,7 +2158,7 @@ body.editing-active [data-editable="true"] {
                             <span class="badge">CAPABILITY 2.2</span>
                             <span class="badge badge-teal">FROM ASSISTANT TO ASYNC AGENT TEAM</span>
                         </div>
-                        <div class="page-indicator">SLIDE 06 / 34</div>
+                        <div class="page-indicator">SLIDE 06 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -2189,7 +2284,7 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 06: LAYER 2.3 - EXTENSIBLE ECOSYSTEM & STANDARDS AS CODE
+                 SLIDE 07: LAYER 2.3 - EXTENSIBLE ECOSYSTEM & STANDARDS AS CODE
                  ========================================== -->
             <section class="slide" data-slide="7">
                 <div class="nordic-wrap">
@@ -2198,7 +2293,7 @@ body.editing-active [data-editable="true"] {
                             <span class="badge">CAPABILITY 2.3</span>
                             <span class="badge badge-teal">EXTENSIBLE AGENT &amp; TOOL ECOSYSTEM</span>
                         </div>
-                        <div class="page-indicator">SLIDE 07 / 34</div>
+                        <div class="page-indicator">SLIDE 07 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -2315,21 +2410,97 @@ body.editing-active [data-editable="true"] {
                 </div>
             </section>
 
-            <!-- ==========================================
-                 SLIDE 07: LAYER 2.4 - EXECUTABLE AUTOMATION & AGENTIC WORKFLOW
-                 ========================================== -->
-            <section class="slide" data-slide="8">
+            <!-- === SLIDE 08: CAPABILITY 2.4 - GITHUB INTELLIGENCE === -->
+            <section class="slide intelligence-slide" data-slide="8" data-edit-namespace="intelligence">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">CAPABILITY 2.4</span>
+                            <span class="badge">PART 02 · CAPABILITY 2.4</span>
+                            <span class="badge badge-teal">CONTEXT &amp; CONTINUOUS LEARNING</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 08 / 33</div>
+                    </header>
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">能力层 2.4：GitHub Intelligence<br><span>让工程经验，进入下一次交付</span></h2>
+                        <div class="slide-subtitle">
+                            来自 GitHub 数据关联图的<strong>上下文与学习层</strong>。2.1 组装本次任务的证据；2.4 让后续任务复用并更新经验。
+                        </div>
+                    </div>
+                    <div class="intelligence-body reveal d2">
+                        <div class="intelligence-cards">
+                            <article class="float-card intelligence-card">
+                                <div class="card-top">
+                                    <span class="badge badge-navy">MEMORY · 记住</span>
+                                    <span class="badge">跨会话复用</span>
+                                </div>
+                                <h3>让知识跨会话延续</h3>
+                                <p class="float-lead">仓库事实与个人偏好，<br>在支持的会话中按需复用。</p>
+                                <div class="intelligence-example">仓库记忆附代码引用，使用时核对；<br>不自动汇聚为全组织共享记忆。</div>
+                            </article>
+                            <article class="float-card intelligence-card">
+                                <div class="card-top">
+                                    <span class="badge badge-teal">DREAMING · 反思</span>
+                                    <span class="badge">后台整理</span>
+                                </div>
+                                <h3>让经验保持新鲜</h3>
+                                <p class="float-lead">结合代码、会话与评审反馈，<br>整理记忆，改进工程指导。</p>
+                                <div class="intelligence-example">记忆与内部评审指导可自动更新；<br>入库指令与 Skill 的变更通过 PR。</div>
+                            </article>
+                            <article class="float-card intelligence-card">
+                                <div class="card-top">
+                                    <span class="badge badge-navy">CODE SEARCH · 找到</span>
+                                    <span class="badge">超出本地检出</span>
+                                </div>
+                                <h3>找到有权限的相关代码</h3>
+                                <p class="float-lead">按任务检索相关实现，<br>不必把所有代码塞进提示词。</p>
+                                <div class="intelligence-example">文本、正则、符号与语义检索互补；<br>索引、分支与客户端支持各有边界。</div>
+                            </article>
+                        </div>
+                        <div class="intelligence-loop" role="group" aria-label="Engineering context and learning loop">
+                            <div class="intelligence-loop-label">CONTEXT → LEARNING</div>
+                            <div class="intelligence-loop-step">当前任务<small>2.1 组装工程证据</small></div>
+                            <span class="intelligence-loop-arrow" aria-hidden="true">→</span>
+                            <div class="intelligence-loop-step">执行与评审<small>形成可追溯的反馈</small></div>
+                            <span class="intelligence-loop-arrow" aria-hidden="true">→</span>
+                            <div class="intelligence-loop-step">2.4 更新经验<small>整理记忆与工程指导</small></div>
+                            <span class="intelligence-loop-arrow" aria-hidden="true">→</span>
+                            <div class="intelligence-loop-step">下一次交付<small>按需检索、复用与核对</small></div>
+                        </div>
+                        <div class="intelligence-policy">
+                            <div><strong>不是训练新模型：</strong>更新的是上下文与指导，<br>不更新底层模型权重；仍需测试与审批。</div>
+                            <div><strong>启用边界：</strong>Dreaming 为自愿开启的预览，消耗 AI credits；<br>各能力可用性受计划、客户端与组织策略约束。</div>
+                        </div>
+                    </div>
+                    <nav class="context-sources" aria-label="GitHub Intelligence official sources">
+                        <span>官方依据：</span>
+                        <a href="https://github.blog/changelog/2026-10-28-github-intelligence-puts-your-code-context-and-history-to-work/" target="_blank" rel="noopener noreferrer">Intelligence 定义</a>
+                        <a href="https://docs.github.com/en/copilot/concepts/prompting-and-context/copilot-memory" target="_blank" rel="noopener noreferrer">Memory</a>
+                        <a href="https://docs.github.com/en/copilot/concepts/prompting-and-context/copilot-dreaming" target="_blank" rel="noopener noreferrer">Dreaming</a>
+                        <a href="https://docs.github.com/en/search-github/github-code-search/about-github-code-search" target="_blank" rel="noopener noreferrer">Code Search</a>
+                        <a href="https://docs.github.com/en/copilot/concepts/prompting-and-context/repository-indexing" target="_blank" rel="noopener noreferrer">语义索引</a>
+                    </nav>
+                    <footer class="bottom-strip">
+                        <div><strong>CIO 价值：</strong>不只加速一次编码，更让经验可积累、可更新、可复用；持续学习不等于免治理。</div>
+                        <div class="context-label">LAYER 2.4 — INTELLIGENCE</div>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SLIDE 09: LAYER 2.5 - EXECUTABLE AUTOMATION & AGENTIC WORKFLOW
+                 ========================================== -->
+            <section class="slide" data-slide="9">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">CAPABILITY 2.5</span>
                             <span class="badge badge-teal">EXECUTABLE AUTOMATION &amp; AGENTIC WORKFLOW</span>
                         </div>
-                        <div class="page-indicator">SLIDE 08 / 34</div>
+                        <div class="page-indicator">SLIDE 09 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
-                        <h2 class="slide-title">能力层 2.4：<span>可执行、可验证的工程自动化（Continuous AI）</span></h2>
+                        <h2 class="slide-title" data-edit-revision="intelligence">能力层 2.5：<span>可执行、可验证的工程自动化（Continuous AI）</span></h2>
                         <div class="slide-subtitle">
                             将 AI 推理嵌入 GitHub Actions，交付<strong>跑通真实测试的工程产物</strong>。
                         </div>
@@ -2401,26 +2572,26 @@ body.editing-active [data-editable="true"] {
 
                     <footer class="bottom-strip">
                         <div><strong>本质跃升：</strong>传统助手只给聊天文本；Agentic 平台交付经过真实验证的 PR。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.4 · CONTINUOUS AI PIPELINE</div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.5 · CONTINUOUS AI PIPELINE</div>
                     </footer>
                 </div>
             </section>
 
             <!-- ==========================================
-                 SLIDE 08: LAYER 2.5 - SECURITY & GOVERNANCE
+                 SLIDE 10: LAYER 2.6 - SECURITY & GOVERNANCE
                  ========================================== -->
-            <section class="slide" data-slide="9">
+            <section class="slide" data-slide="10">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">CAPABILITY 2.5</span>
+                            <span class="badge">CAPABILITY 2.6</span>
                             <span class="badge badge-teal">SECURITY, QUALITY &amp; HUMAN GOVERNANCE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 09 / 34</div>
+                        <div class="page-indicator">SLIDE 10 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
-                        <h2 class="slide-title">能力层 2.5：<span>四重纵深安全门禁与分级自治治理</span></h2>
+                        <h2 class="slide-title" data-edit-revision="intelligence">能力层 2.6：<span>四重纵深安全门禁与分级自治治理</span></h2>
                         <div class="slide-subtitle">
                             所有 Agent 产出的代码必须穿过<strong>四道强制关卡</strong>，最终由人类批准合入。
                         </div>
@@ -2522,26 +2693,26 @@ body.editing-active [data-editable="true"] {
 
                     <footer class="bottom-strip">
                         <div><strong>合规底座：</strong>满足金融、零售与制造企业对权限隔离、安全清零与审计追溯的严苛要求。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.5 · GOVERNANCE</div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.6 · GOVERNANCE</div>
                     </footer>
                 </div>
             </section>
 
             <!-- ==========================================
-                 SLIDE 09: LAYER 2.6 - PRODUCTION OPERATIONS LOOP
+                 SLIDE 11: LAYER 2.7 - PRODUCTION OPERATIONS LOOP
                  ========================================== -->
-            <section class="slide" data-slide="10">
+            <section class="slide" data-slide="11">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">CAPABILITY 2.6</span>
+                            <span class="badge">CAPABILITY 2.7</span>
                             <span class="badge badge-teal">FROM DEVELOPMENT TO PRODUCTION SELF-HEALING</span>
                         </div>
-                        <div class="page-indicator">SLIDE 10 / 34</div>
+                        <div class="page-indicator">SLIDE 11 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
-                        <h2 class="slide-title">能力层 2.6：<span>从受控灰度发布延伸到生产自愈闭环</span></h2>
+                        <h2 class="slide-title" data-edit-revision="intelligence">能力层 2.7：<span>从受控灰度发布延伸到生产自愈闭环</span></h2>
                         <div class="slide-subtitle">
                             PR 合并不是终点——生产告警直接回流 GitHub，形成<strong>九步自愈飞轮</strong>。
                         </div>
@@ -2621,577 +2792,27 @@ body.editing-active [data-editable="true"] {
 
                     <footer class="bottom-strip">
                         <div><strong>运维跃迁：</strong>把数小时人工查日志拉群，压缩为分钟级“SRE 诊断 + Coding Agent 修复”。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.6 · PROD LOOP</div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">CAPABILITY 2.7 · PROD LOOP</div>
                     </footer>
                 </div>
             </section>
 
+
+
+
+
+
             <!-- ==========================================
-                 SLIDE 10: END-TO-END CUSTOMER STORY OVERVIEW
+                 SLIDE 12: MICROSOFT BEST PRACTICE (PART 1) - VS CODE WEEKLY RELEASE
                  ========================================== -->
-            <section class="slide" data-slide="11">
+            <section class="slide" data-slide="12" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">PART 03 · END-TO-END CUSTOMER STORY</span>
-                            <span class="badge badge-teal">7-ACT SCENARIO STORYBOARD</span>
-                        </div>
-                        <div class="page-indicator">SLIDE 11 / 34</div>
-                    </header>
-
-                    <div class="title-section reveal d1">
-                        <h2 class="slide-title">实战演示剧本：<span>大促订单取消后“30 秒库存回补”</span></h2>
-                        <div class="slide-subtitle">
-                            以零售高并发<strong>跨服务、强幂等、防超卖</strong>场景，七幕串联六层能力。
-                        </div>
-                    </div>
-
-                    <div class="hero-card reveal d2" style="padding: 24px 36px; background: var(--navy); color: #FFFFFF; display: grid; grid-template-columns: 650px 1fr; gap: 32px; align-items: center;">
-                        <div>
-                            <div style="font-family: var(--font-mono); font-size: 12.5px; color: #38BDF8; margin-bottom: 6px;">LIVE DEMO SCENARIO // 业务痛点与四大硬指标</div>
-                            <div style="font-size: 23px; font-weight: 800; line-height: 1.42;">
-                                大促取消订单后库存未及时释放引发“假缺货”。改造须满足：<strong>30 秒回补、唯一幂等防重、退避重试、生产连接池限流</strong>。
-                            </div>
-                        </div>
-                        <div style="background: var(--navy-light); border: 1px solid #334155; border-radius: 14px; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between;">
-                            <div style="text-align: center;">
-                                <div style="font-family: var(--font-mono); font-size: 11px; color: #38BDF8;">ORDER SERVICE</div>
-                                <div style="font-size: 17px; font-weight: 800; margin-top: 4px;">🛒 订单取消事件</div>
-                            </div>
-                            <div style="color: #38BDF8; font-family: var(--font-mono); font-size: 13px;">── CancelEvent ──▶</div>
-                            <div style="text-align: center; background: rgba(245, 158, 11, 0.16); border: 1px solid #F59E0B; padding: 8px 14px; border-radius: 10px;">
-                                <div style="font-family: var(--font-mono); font-size: 11px; color: #FBBF24;">EVENT BUS</div>
-                                <div style="font-size: 16px; font-weight: 800; margin-top: 2px;">⚡ 重试 + 死信队列</div>
-                            </div>
-                            <div style="color: #2DD4BF; font-family: var(--font-mono); font-size: 13px;">── 唯一幂等键 ──▶</div>
-                            <div style="text-align: center; background: rgba(45, 212, 191, 0.16); border: 1px solid #2DD4BF; padding: 8px 14px; border-radius: 10px;">
-                                <div style="font-family: var(--font-mono); font-size: 11px; color: #2DD4BF;">INVENTORY DB</div>
-                                <div style="font-size: 16px; font-weight: 800; margin-top: 2px;">📦 原子回补 + 审计</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="reveal d3" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; height: 390px;">
-                        <div class="float-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge">ACT 01</span>
-                                    <span style="font-size: 22px;">📋</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px;">契约建单</div>
-                                <p style="font-size: 16.5px; color: var(--slate); line-height: 1.48;">父 Issue #1 定义 6 条 DoD 验收标准。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--sky);"></div></div>
-                        </div>
-
-                        <div class="float-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge">ACT 02</span>
-                                    <span style="font-size: 22px;">🧭</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px;">Plan 诊断</div>
-                                <p style="font-size: 16.5px; color: var(--slate); line-height: 1.48;">定位 5 大架构缺陷，先批方案后拆单。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--sky);"></div></div>
-                        </div>
-
-                        <div class="float-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge">ACT 03</span>
-                                    <span style="font-size: 22px;">⚡</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px;">多路并发</div>
-                                <p style="font-size: 16.5px; color: var(--slate); line-height: 1.48;">业务/压测/SRE 三类 Agent 隔离沙箱并行。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--sky);"></div></div>
-                        </div>
-
-                        <div class="float-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge badge-teal">ACT 04</span>
-                                    <span style="font-size: 22px;">🛡️</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px;">机器拦竞态</div>
-                                <p style="font-size: 16.5px; color: var(--slate); line-height: 1.48;">AI Review 揪出非原子更新并自动修复。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--teal);"></div></div>
-                        </div>
-
-                        <div class="float-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge badge-teal">ACT 05</span>
-                                    <span style="font-size: 22px;">👤</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px;">人类终审</div>
-                                <p style="font-size: 16.5px; color: var(--slate); line-height: 1.48;">架构师把关边界与回滚开关后合入。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--teal);"></div></div>
-                        </div>
-
-                        <div class="float-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge badge-amber">ACT 06</span>
-                                    <span style="font-size: 22px;">🚀</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px;">金丝雀灰度</div>
-                                <p style="font-size: 16.5px; color: var(--slate); line-height: 1.48;">环境审批放量，联动看板实时验证。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--amber);"></div></div>
-                        </div>
-
-                        <div class="float-card navy-card" style="padding: 20px 18px; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="badge badge-teal">ACT 07</span>
-                                    <span style="font-size: 22px;">🔄</span>
-                                </div>
-                                <div style="font-size: 21px; font-weight: 900; margin: 14px 0 8px; color: #FFF;">生产自愈</div>
-                                <p style="font-size: 16.5px; color: #CBD5E1; line-height: 1.48;">连接池告警 ➔ 自动建单 ➔ 批量退避修复。</p>
-                            </div>
-                            <div class="bar-track"><div class="bar-fill" style="width: 100%; background: #2DD4BF;"></div></div>
-                        </div>
-                    </div>
-
-                    <footer class="bottom-strip">
-                        <div><strong>演示仓库就绪：</strong><code>nickhou1983/retail-inventory-agentic-demo</code>（含父子 Issue #1~#4 与实时看板）。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">7-ACT END-TO-END STORYBOARD</div>
-                    </footer>
-                </div>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 11: ACT I & ACT II - ISSUE & PLAN UI
-                 ========================================== -->
-            <section class="slide" data-slide="12">
-                <div class="nordic-wrap">
-                    <header class="header-bar">
-                        <div class="badge-group">
-                            <span class="badge">STORY ACT 01 &amp; ACT 02</span>
-                            <span class="badge badge-teal">GITHUB ISSUE &amp; COPILOT PLANNER UI</span>
-                        </div>
-                        <div class="page-indicator">SLIDE 12 / 34</div>
-                    </header>
-
-                    <div class="title-section reveal d1">
-                        <h2 class="slide-title">第一幕 &amp; 第二幕：<span>SDD 规约驱动开发 + 先规划后执行</span></h2>
-                        <div class="slide-subtitle">
-                            拒绝无序 <strong>Vibe Coding</strong>——以 <code>Spec 契约 ➔ Plan 方案 ➔ Tasks 子单</code> 驱动开发。
-                        </div>
-                    </div>
-
-                    <div class="grid-2 reveal d2" style="height: 600px;">
-                        <div class="mock-window light">
-                            <div class="mock-topbar">
-                                <div class="window-dots">
-                                    <span class="win-dot r"></span>
-                                    <span class="win-dot y"></span>
-                                    <span class="win-dot g"></span>
-                                    <span style="margin-left: 10px; font-weight: 700; color: var(--navy);">retail-inventory-agentic-demo/issues/1</span>
-                                </div>
-                                <span class="badge" style="font-size: 11px; padding: 3px 10px;">ACT 01 · LIVING SPEC (SDD)</span>
-                            </div>
-                            <div class="mock-body" style="justify-content: space-between;">
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                        <span style="background: #10B981; color: #FFF; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 99px;">● Parent Issue #1</span>
-                                        <span style="font-family: var(--font-mono); font-size: 12.5px; color: var(--sky); font-weight: 700;">Sub-issues: #2 · #3 · #4</span>
-                                    </div>
-                                    <div style="font-size: 24px; font-weight: 900; color: var(--navy); margin-bottom: 14px;">
-                                        [P0] 大促订单取消 30 秒库存回补与幂等防超补机制
-                                    </div>
-
-                                    <div style="font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 8px;">ACCEPTANCE CRITERIA (DoD 验收契约)</div>
-                                    <div class="tag-list" style="gap: 9px;">
-                                        <div class="tag-item" style="padding: 10px 14px; font-size: 17px;">☑️ <strong>1. SLA 时效：</strong>取消后 <strong>30 秒内</strong>完成库存释放</div>
-                                        <div class="tag-item" style="padding: 10px 14px; font-size: 17px;">☑️ <strong>2. 严格幂等：</strong>重复事件绝不重复加库存</div>
-                                        <div class="tag-item" style="padding: 10px 14px; font-size: 17px;">☑️ <strong>3. 重试与死信：</strong>指数退避重试 + DLQ 死信兜底</div>
-                                        <div class="tag-item" style="padding: 10px 14px; font-size: 17px;">☑️ <strong>4. 审计留痕：</strong>写入 <code>inventory_audit_log</code> 审计表</div>
-                                    </div>
-                                </div>
-                                <div style="background: var(--sky-soft); color: var(--sky); padding: 12px 16px; border-radius: 10px; font-size: 16.5px; font-weight: 800;">
-                                    💡 SDD 规约驱动：契约既驱动生成代码，又反向校验防“规约漂移（Spec Drift）”。
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mock-window">
-                            <div class="mock-topbar">
-                                <div class="window-dots">
-                                    <span class="win-dot r"></span>
-                                    <span class="win-dot y"></span>
-                                    <span class="win-dot g"></span>
-                                    <span style="margin-left: 10px; font-weight: 700; color: #38BDF8;">Copilot Plan Mode · 只读跨服务架构诊断</span>
-                                </div>
-                                <span class="badge badge-teal" style="font-size: 11px; padding: 3px 10px;">ACT 02 · PLAN FIRST</span>
-                            </div>
-                            <div class="mock-body" style="justify-content: space-between;">
-                                <div>
-                                    <div style="font-size: 22px; font-weight: 900; color: #FFFFFF; margin-bottom: 14px;">
-                                        精准定位存量代码 5 大盲区（0 行代码改动）
-                                    </div>
-                                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                                        <div class="code-line" style="background: #1E293B; color: #E2E8F0; font-size: 15.5px; padding: 9px 14px;">
-                                            <span style="color: #FBBF24; font-weight: 700;">[Gap 1]</span> <code>order-service</code> 仅改状态，未发布取消事件
-                                        </div>
-                                        <div class="code-line" style="background: #1E293B; color: #E2E8F0; font-size: 15.5px; padding: 9px 14px;">
-                                            <span style="color: #FBBF24; font-weight: 700;">[Gap 2]</span> <code>event-bus</code> 无 ACK 确认、无退避重试与死信队列
-                                        </div>
-                                        <div class="code-line" style="background: rgba(239, 68, 68, 0.16); color: #FCA5A5; font-size: 15.5px; padding: 9px 14px;">
-                                            <span style="color: #EF4444; font-weight: 700;">[Gap 3 · 高危]</span> <code>inventory-service</code> 无幂等键，重复消息会超补
-                                        </div>
-                                        <div class="code-line" style="background: #1E293B; color: #E2E8F0; font-size: 15.5px; padding: 9px 14px;">
-                                            <span style="color: #38BDF8; font-weight: 700;">[Gap 4 &amp; 5]</span> 缺并发混沌测试；缺 Prometheus 回补指标
-                                        </div>
-                                    </div>
-
-                                    <div style="margin-top: 14px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 12px 16px;">
-                                        <div style="font-family: var(--font-mono); font-size: 11.5px; color: #38BDF8; margin-bottom: 4px;">SUB-ISSUES DISPATCH // 拆解 3 个子工单并行派活</div>
-                                        <div style="font-size: 16px; color: #E2E8F0; font-weight: 700;">Sub-issue #2（业务） · #3（混沌压测） · #4（SRE 观测）</div>
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(45, 212, 191, 0.16); border: 1px solid #2DD4BF; padding: 12px 18px; border-radius: 10px;">
-                                    <span style="font-size: 16.5px; font-weight: 800; color: #2DD4BF;">👤 架构师批准方案并一键派发</span>
-                                    <span style="background: #2DD4BF; color: #0F172A; font-family: var(--font-mono); font-weight: 900; font-size: 13px; padding: 6px 14px; border-radius: 8px;">✓ APPROVE PLAN</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <footer class="bottom-strip">
-                        <div><strong>源头防偏：</strong>跨仓库上下文理解 + 先批 Plan 后编码，杜绝 AI 盲目生成错误代码。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">ACT 01 &amp; ACT 02 · INTAKE &amp; PLANNING</div>
-                    </footer>
-                </div>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 12: ACT III - PARALLEL MULTI-AGENT MISSION CONTROL
-                 ========================================== -->
-            <section class="slide" data-slide="13">
-                <div class="nordic-wrap">
-                    <header class="header-bar">
-                        <div class="badge-group">
-                            <span class="badge">STORY ACT 03</span>
-                            <span class="badge badge-teal">MULTI-AGENT PARALLEL MISSION CONTROL</span>
-                        </div>
-                        <div class="page-indicator">SLIDE 13 / 34</div>
-                    </header>
-
-                    <div class="title-section reveal d1">
-                        <h2 class="slide-title">第三幕：<span>多路专业 Agent 在隔离沙箱中并行交付</span></h2>
-                        <div class="slide-subtitle">
-                            支持横向扩展 <strong>N 路并发会话</strong>；本例以<strong>业务、测试、运维</strong>三类专家同步推进。
-                        </div>
-                    </div>
-
-                    <div class="grid-3 reveal d2" style="height: 515px;">
-                        <div class="float-card" style="justify-content: space-between; padding: 26px 28px;">
-                            <div>
-                                <div class="card-top" style="margin-bottom: 12px;">
-                                    <div class="step-num">A</div>
-                                    <span class="badge">SUB-ISSUE #2 · @inventory-impl</span>
-                                </div>
-                                <div class="float-title" style="font-size: 24px;">库存回补与幂等重试</div>
-                                <div style="font-family: var(--font-mono); font-size: 13px; color: var(--sky); background: var(--sky-soft); padding: 6px 12px; border-radius: 8px; margin: 12px 0;">
-                                    ⎇ branch: feat/inventory-idempotent
-                                </div>
-                                <div class="tag-list" style="gap: 10px;">
-                                    <div class="tag-item"><strong>事件发布：</strong>取消订单触发 <code>OrderCancelledEvent</code></div>
-                                    <div class="tag-item"><strong>幂等防重：</strong><code>eventId</code> 去重防止重复加库存</div>
-                                    <div class="tag-item"><strong>退避与死信：</strong>3 次重试 + DLQ + 审计日志</div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--sky); margin-bottom: 6px;">
-                                    <span>STATUS: PR READY</span>
-                                    <span>100%</span>
-                                </div>
-                                <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--sky);"></div></div>
-                            </div>
-                        </div>
-
-                        <div class="float-card" style="justify-content: space-between; padding: 26px 28px;">
-                            <div>
-                                <div class="card-top" style="margin-bottom: 12px;">
-                                    <div class="step-num teal">B</div>
-                                    <span class="badge badge-teal">SUB-ISSUE #3 · @chaos-qa</span>
-                                </div>
-                                <div class="float-title" style="font-size: 24px;">高并发与混沌故障压测</div>
-                                <div style="font-family: var(--font-mono); font-size: 13px; color: var(--teal); background: var(--teal-soft); padding: 6px 12px; border-radius: 8px; margin: 12px 0;">
-                                    ⎇ branch: test/chaos-concurrency
-                                </div>
-                                <div class="tag-list" style="gap: 10px;">
-                                    <div class="tag-item"><strong>50 路并发重放：</strong>同一事件并发投递仅回补 1 次</div>
-                                    <div class="tag-item"><strong>DB 超时注入：</strong>验证重试恢复与死信转移</div>
-                                    <div class="tag-item"><strong>看板 E2E 校验：</strong>验证售罄商品自动恢复有货</div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--teal); margin-bottom: 6px;">
-                                    <span>STATUS: ALL TESTS PASSED</span>
-                                    <span>100%</span>
-                                </div>
-                                <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--teal);"></div></div>
-                            </div>
-                        </div>
-
-                        <div class="float-card navy-card" style="justify-content: space-between; padding: 26px 28px;">
-                            <div>
-                                <div class="card-top" style="margin-bottom: 12px;">
-                                    <div class="step-num dark">C</div>
-                                    <span class="badge badge-teal">SUB-ISSUE #4 · @sre-observability</span>
-                                </div>
-                                <div class="float-title" style="font-size: 24px;">监控指标与应急回滚手册</div>
-                                <div style="font-family: var(--font-mono); font-size: 13px; color: #38BDF8; background: rgba(56, 189, 248, 0.14); padding: 6px 12px; border-radius: 8px; margin: 12px 0;">
-                                    ⎇ branch: ops/metrics-runbook
-                                </div>
-                                <div class="tag-list" style="gap: 10px;">
-                                    <div class="tag-item"><strong>Prometheus 埋点：</strong>成功率、P99 耗时与连接池水位</div>
-                                    <div class="tag-item"><strong>告警阈值规则：</strong>DLQ &gt; 0 或连接池 &gt; 85% 告警</div>
-                                    <div class="tag-item"><strong>SRE 应急手册：</strong>Feature Flag 秒级降级指南</div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: #2DD4BF; margin-bottom: 6px;">
-                                    <span>STATUS: OPS READY</span>
-                                    <span>100%</span>
-                                </div>
-                                <div class="bar-track"><div class="bar-fill" style="width: 100%; background: #2DD4BF;"></div></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="float-card reveal d3" style="padding: 18px 30px; flex-direction: row; justify-content: space-between; align-items: center;">
-                        <div style="font-size: 19px; font-weight: 800; color: var(--navy);">
-                            💡 <strong>Agent HQ 集中管控：</strong>父子工单状态自动汇总，测试与可观测性不再掉队。
-                        </div>
-                        <span class="badge">SUB-ISSUES 3/3 COMPLETED</span>
-                    </div>
-
-                    <footer class="bottom-strip">
-                        <div><strong>并行红利：</strong>把过去串行 3 周的开发、补测试、加监控，压缩为同一时段并行完结。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">ACT 03 · PARALLEL EXECUTION</div>
-                    </footer>
-                </div>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 13: ACT IV & ACT V - PR DIFF & HUMAN SIGN-OFF
-                 ========================================== -->
-            <section class="slide" data-slide="14">
-                <div class="nordic-wrap">
-                    <header class="header-bar">
-                        <div class="badge-group">
-                            <span class="badge">STORY ACT 04 &amp; ACT 05</span>
-                            <span class="badge badge-teal">PR DIFF &amp; HUMAN ARCHITECT APPROVAL</span>
-                        </div>
-                        <div class="page-indicator">SLIDE 14 / 34</div>
-                    </header>
-
-                    <div class="title-section reveal d1">
-                        <h2 class="slide-title">第四幕 &amp; 第五幕：<span>Generator-Verifier 对抗初审与人类问责</span></h2>
-                        <div class="slide-subtitle">
-                            独立上下文 <strong>Verifier Agent</strong> 揪出非原子读写漏洞；架构师聚焦<strong>四大高价值决策</strong>。
-                        </div>
-                    </div>
-
-                    <div class="grid-2 reveal d2" style="height: 600px;">
-                        <div class="mock-window">
-                            <div class="mock-topbar">
-                                <div class="window-dots">
-                                    <span class="win-dot r"></span>
-                                    <span class="win-dot y"></span>
-                                    <span class="win-dot g"></span>
-                                    <span style="margin-left: 10px; font-weight: 700; color: #38BDF8;">PR #1045 · src/inventory/inventory-service.ts</span>
-                                </div>
-                                <span class="badge badge-amber" style="font-size: 11px; padding: 3px 10px;">ACT 04 · AI CODE REVIEW</span>
-                            </div>
-                            <div class="mock-body" style="justify-content: space-between; gap: 10px;">
-                                <div style="background: rgba(245, 158, 11, 0.14); border: 1.5px solid #F59E0B; border-radius: 10px; padding: 14px 18px;">
-                                    <div style="font-family: var(--font-mono); font-size: 12.5px; color: #FBBF24; font-weight: 700;">🤖 @copilot-code-review · HIGH CONCURRENCY RACE CONDITION</div>
-                                    <div style="font-size: 16.5px; color: #FDE68A; margin-top: 6px; font-weight: 700;">
-                                        先 <code>has(eventId)</code> 再 <code>await</code> 后写入存在并发时间窗，并发重放会超补库存！已自动改为 CAS 乐观锁原子更新。
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="font-family: var(--font-mono); font-size: 12px; color: #94A3B8;">AUTO-FIX COMMIT // 非原子读写 ➔ 唯一键抢占 + 乐观锁原子更新</div>
-                                    <div class="code-line code-del">- if (this.processedEvents.has(evt.eventId)) return;</div>
-                                    <div class="code-line code-del">- item.availableQty += evt.qty; // 并发重放导致超补!</div>
-                                    <div class="code-line code-add">+ // 原子事务：唯一幂等键抢占成功 + 版本号 CAS 校验</div>
-                                    <div class="code-line code-add">+ await db.sql`WITH ins AS (INSERT INTO processed_events(id) VALUES(${evtId})</div>
-                                    <div class="code-line code-add">+   ON CONFLICT DO NOTHING RETURNING 1)</div>
-                                    <div class="code-line code-add">+   UPDATE stock SET qty = qty + ${qty}, ver = ver + 1 WHERE EXISTS (SELECT 1 FROM ins)`;</div>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: #1E293B; padding: 10px 16px; border-radius: 8px; font-family: var(--font-mono); font-size: 13px; color: #2DD4BF;">
-                                    <span>✓ CodeQL: 0 Alerts</span>
-                                    <span>✓ Secret Scan: Pass</span>
-                                    <span>✓ 50x Race Test: Green</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="float-card navy-card" style="justify-content: space-between;">
-                            <div>
-                                <div class="card-top" style="margin-bottom: 14px;">
-                                    <span class="badge badge-teal">第五幕 · 人类架构师终审</span>
-                                    <span style="font-family: var(--font-mono); font-size: 13px; color: #2DD4BF;">HUMAN ACCOUNTABILITY</span>
-                                </div>
-                                <div class="float-title" style="font-size: 26px; margin-bottom: 16px;">机器找漏洞，人类把关 4 大高价值决策</div>
-
-                                <div class="tag-list" style="gap: 12px;">
-                                    <div class="tag-item">
-                                        <strong>1. 业务规则契合：</strong>回补逻辑是否契合预售锁库与退款状态机
-                                    </div>
-                                    <div class="tag-item">
-                                        <strong>2. 架构边界一致：</strong>事件解耦与幂等表是否符合全局架构规范
-                                    </div>
-                                    <div class="tag-item">
-                                        <strong>3. 监控告警完备：</strong>死信队列堆积能否第一时间触发告警
-                                    </div>
-                                    <div class="tag-item">
-                                        <strong>4. 秒级回滚兜底：</strong>极端异常下能否一键关闭 Feature Flag 降级
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(45, 212, 191, 0.16); border: 1.5px solid #2DD4BF; padding: 14px 20px; border-radius: 12px;">
-                                <div>
-                                    <div style="font-family: var(--font-mono); font-size: 11px; color: #2DD4BF;">BRANCH PROTECTION GATE</div>
-                                    <div style="font-size: 17.5px; font-weight: 800; color: #FFF;">架构师批准，正式合入 main 主干</div>
-                                </div>
-                                <span style="background: #2DD4BF; color: #0F172A; font-family: var(--font-mono); font-weight: 900; font-size: 13px; padding: 8px 16px; border-radius: 8px;">✓ MERGE PR</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <footer class="bottom-strip">
-                        <div><strong>人机协同范式：</strong>AI 消除 80% 评审噪音，让资深工程师专注 20% 架构与业务决策。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">ACT 04 &amp; ACT 05 · REVIEW &amp; MERGE</div>
-                    </footer>
-                </div>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 14: ACT VI & ACT VII - CANARY & SELF-HEALING
-                 ========================================== -->
-            <section class="slide" data-slide="15">
-                <div class="nordic-wrap">
-                    <header class="header-bar">
-                        <div class="badge-group">
-                            <span class="badge">STORY ACT 06 &amp; ACT 07</span>
-                            <span class="badge badge-teal">CANARY ROLLOUT &amp; APM SELF-HEALING</span>
-                        </div>
-                        <div class="page-indicator">SLIDE 15 / 34</div>
-                    </header>
-
-                    <div class="title-section reveal d1">
-                        <h2 class="slide-title">第六幕 &amp; 第七幕：<span>金丝雀受控灰度与生产连接池异常自愈</span></h2>
-                        <div class="slide-subtitle">
-                            从“代码合入”延伸到“生产自愈”——SRE Agent 与 Coding Agent 自动接力。
-                        </div>
-                    </div>
-
-                    <div class="grid-2 reveal d2" style="height: 600px;">
-                        <div class="float-card" style="justify-content: space-between;">
-                            <div>
-                                <div class="card-top" style="margin-bottom: 14px;">
-                                    <span class="badge">第六幕 · 受控渐进式灰度</span>
-                                    <span style="font-family: var(--font-mono); font-size: 13px; color: var(--sky);">ENVIRONMENT GATES</span>
-                                </div>
-                                <div class="float-title" style="font-size: 26px; margin-bottom: 16px;">黄金场景验证 + 金丝雀三阶放量</div>
-
-                                <div style="background: var(--slide-bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px;">
-                                    <div>
-                                        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; margin-bottom: 6px;">
-                                            <span>STAGE 1 · 预发环境 Golden Scenario E2E</span>
-                                            <span style="font-family: var(--font-mono); color: var(--teal);">PASSED (18.4s)</span>
-                                        </div>
-                                        <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--teal);"></div></div>
-                                    </div>
-                                    <div>
-                                        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; margin-bottom: 6px;">
-                                            <span>STAGE 2 · 生产金丝雀灰度 (5% ➔ 25%)</span>
-                                            <span style="font-family: var(--font-mono); color: var(--sky);">SLA 99.98%</span>
-                                        </div>
-                                        <div class="bar-track"><div class="bar-fill" style="width: 25%; background: var(--sky);"></div></div>
-                                    </div>
-                                    <div>
-                                        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; margin-bottom: 6px;">
-                                            <span>STAGE 3 · Environment 审批全量上线 (100%)</span>
-                                            <span style="font-family: var(--font-mono); color: var(--navy);">100% LIVE</span>
-                                        </div>
-                                        <div class="bar-track"><div class="bar-fill" style="width: 100%; background: var(--navy);"></div></div>
-                                    </div>
-                                </div>
-
-                                <div class="tag-list" style="gap: 10px;">
-                                    <div class="tag-item"><strong>Environment 人工门禁：</strong>发布负责人批准后方可进生产</div>
-                                    <div class="tag-item"><strong>指标实时绑定：</strong>发布版本自动关联回补成功率与 P99</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="float-card navy-card" style="justify-content: space-between;">
-                            <div>
-                                <div class="card-top" style="margin-bottom: 10px;">
-                                    <span class="badge badge-teal">第七幕 · 生产洪峰自动回流自愈</span>
-                                    <span style="font-family: var(--font-mono); font-size: 13px; color: #2DD4BF;">SRE + CODING AGENT</span>
-                                </div>
-                                <div class="float-title" style="font-size: 25px; margin-bottom: 12px;">连接池占满 ➔ SRE 建单 ➔ 批量退避修复</div>
-
-                                <div style="background: #090D16; border: 1.5px solid #334155; border-radius: 12px; padding: 14px 18px; margin-bottom: 14px;">
-                                    <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11.5px; color: #94A3B8; margin-bottom: 6px;">
-                                        <span>APM TELEMETRY // 库存服务 P99 延迟与 DB 连接池水位</span>
-                                        <span style="color: #2DD4BF;">● AUTO-REMEDIATED IN 8 MINS</span>
-                                    </div>
-                                    <svg width="740" height="150" viewBox="0 0 740 150" style="display: block; width: 100%;">
-                                        <line x1="0" y1="35" x2="740" y2="35" stroke="#1E293B" stroke-dasharray="4 4"/>
-                                        <line x1="0" y1="80" x2="740" y2="80" stroke="#1E293B" stroke-dasharray="4 4"/>
-                                        <line x1="0" y1="125" x2="740" y2="125" stroke="#1E293B"/>
-                                        <path d="M 10 115 L 160 112 L 220 108 L 275 22 L 330 28 L 410 110 L 720 114" fill="none" stroke="#38BDF8" stroke-width="3.5"/>
-                                        <circle cx="275" cy="22" r="6" fill="#EF4444"/>
-                                        <rect x="175" y="4" width="215" height="24" rx="6" fill="rgba(239,68,68,0.22)" stroke="#EF4444"/>
-                                        <text x="282" y="20" text-anchor="middle" font-family="Noto Sans SC" font-size="11.5" font-weight="700" fill="#FCA5A5">🚨 重试风暴占满连接池 (98%)</text>
-                                        <circle cx="410" cy="110" r="6" fill="#2DD4BF"/>
-                                        <rect x="425" y="88" width="275" height="26" rx="6" fill="rgba(45,212,191,0.18)" stroke="#2DD4BF"/>
-                                        <text x="562" y="105" text-anchor="middle" font-family="Noto Sans SC" font-size="11.5" font-weight="700" fill="#2DD4BF">✓ PR #1090 批量+退避补丁上线 (18ms)</text>
-                                    </svg>
-                                </div>
-
-                                <div class="tag-list" style="gap: 10px;">
-                                    <div class="tag-item"><strong>1. SRE 秒级定位：</strong>关联日志拐点，自动创建故障 Issue <code>#1089</code></div>
-                                    <div class="tag-item"><strong>2. 自动生成补丁：</strong>Coding Agent 提<strong>批量合并 + 抖动退避</strong> PR</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <footer class="bottom-strip">
-                        <div><strong>全链路闭环：</strong>需求 → 编码 → 评审 → 发布 → 监控 → 故障单 → 修复 PR，同平台一气呵成。</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">ACT 06 &amp; ACT 07 · PROD LOOP</div>
-                    </footer>
-                </div>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 15: MICROSOFT BEST PRACTICE (PART 1) - VS CODE WEEKLY RELEASE
-                 ========================================== -->
-            <section class="slide" data-slide="16">
-                <div class="nordic-wrap">
-                    <header class="header-bar">
-                        <div class="badge-group">
-                            <span class="badge">PART 04 · MICROSOFT ENGINEERING PRACTICE</span>
+                            <span class="badge">PART 03 · MICROSOFT ENGINEERING PRACTICE</span>
                             <span class="badge badge-teal">VS CODE: MONTHLY TO WEEKLY RELEASES</span>
                         </div>
-                        <div class="page-indicator">SLIDE 16 / 34</div>
+                        <div class="page-indicator">SLIDE 12 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3285,16 +2906,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 16: MICROSOFT BEST PRACTICE (PART 2) - DUAL-TRACK CONVERGENCE
+                 SLIDE 13: MICROSOFT BEST PRACTICE (PART 2) - DUAL-TRACK CONVERGENCE
                  ========================================== -->
-            <section class="slide" data-slide="17">
+            <section class="slide" data-slide="13" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">PART 04 · ARCHITECTURAL SYNTHESIS</span>
+                            <span class="badge">PART 03 · ARCHITECTURAL SYNTHESIS</span>
                             <span class="badge badge-teal">DUAL-TRACK CONVERGENCE ARCHITECTURE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 17 / 34</div>
+                        <div class="page-indicator">SLIDE 13 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3395,16 +3016,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 17: 4-6 WEEK PILOT GANTT & ROI GAUGES
+                 SLIDE 14: 4-6 WEEK PILOT GANTT & ROI GAUGES
                  ========================================== -->
-            <section class="slide" data-slide="18">
+            <section class="slide" data-slide="14" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">PART 05 · ADOPTION ROADMAP</span>
+                            <span class="badge">PART 04 · ADOPTION ROADMAP</span>
                             <span class="badge badge-teal">6-WEEK GANTT &amp; ROI DASHBOARD</span>
                         </div>
-                        <div class="page-indicator">SLIDE 18 / 34</div>
+                        <div class="page-indicator">SLIDE 14 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3529,16 +3150,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 18: VSCODE REPO IMPLEMENTATION (PART 1)
+                 SLIDE 15: VSCODE REPO IMPLEMENTATION (PART 1)
                  ========================================== -->
-            <section class="slide" data-slide="19">
+            <section class="slide" data-slide="15" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">PART 05 · VSCODE REPO IMPLEMENTATION (1/2)</span>
+                            <span class="badge">PART 04 · VSCODE REPO IMPLEMENTATION (1/2)</span>
                             <span class="badge badge-teal">PARALLELISM · AGENT-READY · AUTOMATED TRIAGE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 19 / 34</div>
+                        <div class="page-indicator">SLIDE 15 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3645,16 +3266,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 19: VSCODE REPO IMPLEMENTATION (PART 2)
+                 SLIDE 16: VSCODE REPO IMPLEMENTATION (PART 2)
                  ========================================== -->
-            <section class="slide" data-slide="20">
+            <section class="slide" data-slide="16" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">PART 05 · VSCODE REPO IMPLEMENTATION (2/2)</span>
+                            <span class="badge">PART 04 · VSCODE REPO IMPLEMENTATION (2/2)</span>
                             <span class="badge badge-teal">QUALITY HARNESSES · OWNERSHIP · TASTE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 20 / 34</div>
+                        <div class="page-indicator">SLIDE 16 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3734,16 +3355,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 20: CLOSING & 5 VISUAL PILLARS
+                 SLIDE 17: CLOSING & 5 VISUAL PILLARS
                  ========================================== -->
-            <section class="slide" data-slide="21">
+            <section class="slide" data-slide="17" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
-                            <span class="badge">PART 06 · EXECUTIVE TAKEAWAYS</span>
+                            <span class="badge">PART 05 · EXECUTIVE TAKEAWAYS</span>
                             <span class="badge badge-teal">5 DEFINING ARCHITECTURAL PILLARS</span>
                         </div>
-                        <div class="page-indicator">SLIDE 21 / 34</div>
+                        <div class="page-indicator">SLIDE 17 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3827,22 +3448,22 @@ body.editing-active [data-editable="true"] {
 
                     <footer class="bottom-strip">
                         <div><strong>基于 GitHub 构建 Agentic SDLC 平台</strong> · CIO 精简演讲版（Nordic Air Keynote Edition）</div>
-                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">SLIDE 21 / 34 · EXECUTIVE SUMMARY</div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; color: var(--muted);">SLIDE 17 / 31 · EXECUTIVE SUMMARY</div>
                     </footer>
                 </div>
             </section>
 
             <!-- ==========================================
-                 SLIDE 21: APPENDIX A - HOW UNIFIED CONTEXT WORKS
+                 SLIDE 18: APPENDIX A - HOW UNIFIED CONTEXT WORKS
                  ========================================== -->
-            <section class="slide" data-slide="22">
+            <section class="slide" data-slide="18" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX A · TECHNICAL DEEP DIVE</span>
                             <span class="badge badge-teal">HOW UNIFIED CONTEXT WORKS UNDER THE HOOD</span>
                         </div>
-                        <div class="page-indicator">SLIDE 22 / 34</div>
+                        <div class="page-indicator">SLIDE 18 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -3895,7 +3516,7 @@ body.editing-active [data-editable="true"] {
                                 <div class="tag-list" style="gap: 10px;">
                                     <div class="tag-item" style="font-size: 16.5px;"><strong>显式工程关联：</strong>Issue、PR、Commit 与验证通过链接及 SHA 追溯</div>
                                     <div class="tag-item" style="font-size: 16.5px;"><strong>多路检索互补：</strong>Blackbird 文本、符号导航与语义索引各有边界</div>
-                                    <div class="tag-item" style="font-size: 16.5px;"><strong>Spaces 知识策展：</strong>整理领域资料，仍受来源权限约束</div>
+                                    <div class="tag-item" data-edit-revision="copilot-project" style="font-size: 16.5px;"><strong>Project 知识策展：</strong>整理领域资料，仍受来源权限约束</div>
                                 </div>
                             </div>
                         </div>
@@ -3939,16 +3560,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 22: APPENDIX B - ASYNC AGENT TEAM MECHANICS
+                 SLIDE 19: APPENDIX B - ASYNC AGENT TEAM MECHANICS
                  ========================================== -->
-            <section class="slide" data-slide="23">
+            <section class="slide" data-slide="19" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX B · TECHNICAL DEEP DIVE</span>
                             <span class="badge badge-teal">CAPABILITY 2.2 · ASYNC AGENT TEAM MECHANICS</span>
                         </div>
-                        <div class="page-indicator">SLIDE 23 / 34</div>
+                        <div class="page-indicator">SLIDE 19 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -4056,16 +3677,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 24: APPENDIX C - VSCODE GOLDEN SCENARIOS
+                 SLIDE 20: APPENDIX C - VSCODE GOLDEN SCENARIOS
                  ========================================== -->
-            <section class="slide" data-slide="24">
+            <section class="slide" data-slide="20" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX C · TECHNICAL DEEP DIVE</span>
                             <span class="badge badge-teal">VSCODE GOLDEN SCENARIOS &amp; VIDEO HARNESS</span>
                         </div>
-                        <div class="page-indicator">SLIDE 24 / 34</div>
+                        <div class="page-indicator">SLIDE 20 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -4173,16 +3794,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 25: APPENDIX D - PROJECT HYDRAFUSION
+                 SLIDE 21: APPENDIX D - PROJECT HYDRAFUSION
                  ========================================== -->
-            <section class="slide" data-slide="25">
+            <section class="slide" data-slide="21" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX D · TECHNICAL DEEP DIVE</span>
                             <span class="badge badge-teal">PROJECT HYDRAFUSION · MULTI-MODEL ORCHESTRATION</span>
                         </div>
-                        <div class="page-indicator">SLIDE 25 / 34</div>
+                        <div class="page-indicator">SLIDE 21 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -4287,16 +3908,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 26: APPENDIX E - GITHUB AGENTIC WORKFLOW
+                 SLIDE 22: APPENDIX E - GITHUB AGENTIC WORKFLOW
                  ========================================== -->
-            <section class="slide" data-slide="26">
+            <section class="slide" data-slide="22" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX E · TECHNICAL DEEP DIVE</span>
                             <span class="badge badge-teal">AGENTIC WORKFLOWS · CONTINUOUS AI PIPELINE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 26 / 34</div>
+                        <div class="page-indicator">SLIDE 22 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -4404,16 +4025,16 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- ==========================================
-                 SLIDE 27: APPENDIX F - GITHUB COPILOT AGENT HARNESS ARCHITECTURE
+                 SLIDE 23: APPENDIX F - GITHUB COPILOT AGENT HARNESS ARCHITECTURE
                  ========================================== -->
-            <section class="slide" data-slide="27">
+            <section class="slide" data-slide="23" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX F · TECHNICAL DEEP DIVE</span>
                             <span class="badge badge-teal">GITHUB COPILOT AGENT HARNESS · CORE ARCHITECTURE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 27 / 34</div>
+                        <div class="page-indicator">SLIDE 23 / 33</div>
                     </header>
 
                     <div class="title-section reveal d1">
@@ -4521,14 +4142,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX G / 1: SIX COMPLEMENTARY LAYERS === -->
-            <section class="slide context-appendix" data-slide="28">
+            <section class="slide context-appendix" data-slide="24" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX G · 1 / 6</span>
                             <span class="badge badge-teal">UNIFIED ENGINEERING CONTEXT</span>
                         </div>
-                        <div class="page-indicator">SLIDE 28 / 34</div>
+                        <div class="page-indicator">SLIDE 24 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">附录 G：统一上下文，<br><span>不是把整个 GitHub 塞进一个 Prompt</span></h2>
@@ -4567,7 +4188,7 @@ body.editing-active [data-editable="true"] {
                         <a href="https://docs.github.com/en/graphql/overview/about-the-graphql-api" target="_blank" rel="noopener noreferrer">GraphQL API</a>
                         <a href="https://docs.github.com/en/copilot/concepts/prompting-and-context/repository-indexing" target="_blank" rel="noopener noreferrer">Repository indexing</a>
                         <a href="https://docs.github.com/en/copilot/concepts/customizations/mcp" target="_blank" rel="noopener noreferrer">MCP</a>
-                        <span>六层结构为架构归纳，并非 GitHub 内部部署图。</span>
+                        <span>此处六类技术机制与主图七层能力划分不同，均为架构归纳。</span>
                     </nav>
                     <footer class="bottom-strip">
                         <div><strong>CIO 视角：</strong>价值不在“模型知道一切”，而在“每次决策都有可追溯的工程证据”。</div>
@@ -4577,14 +4198,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX G / 2: OBJECT IDENTITY AND VERSIONED EVIDENCE === -->
-            <section class="slide context-appendix" data-slide="29">
+            <section class="slide context-appendix" data-slide="25" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX G · 2 / 6</span>
                             <span class="badge badge-teal">OBJECTS · LINKS · VERSIONS</span>
                         </div>
-                        <div class="page-indicator">SLIDE 29 / 34</div>
+                        <div class="page-indicator">SLIDE 25 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">工程对象各司其职，<br><span>由链接与版本串成证据链</span></h2>
@@ -4631,14 +4252,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX G / 3: COMPLEMENTARY RETRIEVAL SYSTEMS === -->
-            <section class="slide context-appendix" data-slide="30">
+            <section class="slide context-appendix" data-slide="26" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX G · 3 / 6</span>
                             <span class="badge badge-teal">TEXT · SYMBOLS · SEMANTICS</span>
                         </div>
-                        <div class="page-indicator">SLIDE 30 / 34</div>
+                        <div class="page-indicator">SLIDE 26 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">找代码需要三种视角，<br><span>不是一个“全知向量库”</span></h2>
@@ -4686,14 +4307,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX G / 4: API ACCESS AND RUNTIME ASSEMBLY === -->
-            <section class="slide context-appendix" data-slide="31">
+            <section class="slide context-appendix" data-slide="27" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX G · 4 / 6</span>
                             <span class="badge badge-teal">API ACCESS ≠ CONTEXT INJECTION</span>
                         </div>
-                        <div class="page-indicator">SLIDE 31 / 34</div>
+                        <div class="page-indicator">SLIDE 27 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">API 让事实可访问，<br><span>Harness 决定此刻读什么</span></h2>
@@ -4739,14 +4360,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX G / 5: CONSISTENCY AND PERMISSION BOUNDARIES === -->
-            <section class="slide context-appendix" data-slide="32">
+            <section class="slide context-appendix" data-slide="28" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX G · 5 / 6</span>
-                            <span class="badge badge-teal">CONSISTENCY · ACCESS · SPACES</span>
+                            <span class="badge badge-teal">CONSISTENCY · ACCESS · PROJECT</span>
                         </div>
-                        <div class="page-indicator">SLIDE 32 / 34</div>
+                        <div class="page-indicator">SLIDE 28 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">“统一”不等于“无边界”，<br><span>一致性要分三层核对</span></h2>
@@ -4775,12 +4396,12 @@ body.editing-active [data-editable="true"] {
                         </div>
                         <div class="context-band">
                             <p><strong>权限：</strong>Cloud Agent 默认 GitHub MCP 令牌只读且限当前仓库；跨仓访问需显式授权。实际能力受身份、令牌与产品支持范围共同约束。</p>
-                            <p><strong>Spaces：</strong>策展仓库、文件、Issue、PR 与说明资料；GitHub 来源随源更新，查看者仍受源权限限制。搜索排除 / .gitignore 不等于安全访问控制。</p>
+                            <p data-edit-revision="copilot-project"><strong>Project：</strong>策展仓库、文件、Issue、PR 与说明资料；GitHub 来源随源更新，查看者仍受源权限限制。搜索排除 / .gitignore 不等于安全访问控制。</p>
                         </div>
                     </div>
                     <nav class="context-sources" aria-label="Governance sources">
                         <a href="https://docs.github.com/en/copilot/concepts/customizations/mcp" target="_blank" rel="noopener noreferrer">MCP permissions</a>
-                        <a href="https://docs.github.com/en/copilot/concepts/prompting-and-context/spaces" target="_blank" rel="noopener noreferrer">Copilot Spaces</a>
+                        <a href="https://docs.github.com/en/copilot/concepts/prompting-and-context/spaces" target="_blank" rel="noopener noreferrer">Copilot Project</a>
                         <a href="https://docs.github.com/en/copilot/concepts/security-governance-and-network-settings/content-exclusion" target="_blank" rel="noopener noreferrer">Content exclusion</a>
                         <span>内容排除支持因产品入口而异，不作跨入口的统一保证。</span>
                     </nav>
@@ -4792,14 +4413,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX G / 6: END-TO-END EVIDENCE LOOP === -->
-            <section class="slide context-appendix" data-slide="33">
+            <section class="slide context-appendix" data-slide="29" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX G · 6 / 6</span>
                             <span class="badge badge-teal">FROM ISSUE TO VERIFIED CHANGE</span>
                         </div>
-                        <div class="page-indicator">SLIDE 33 / 34</div>
+                        <div class="page-indicator">SLIDE 29 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">一次库存缺陷修复，<br><span>如何走完上下文闭环？</span></h2>
@@ -4846,14 +4467,14 @@ body.editing-active [data-editable="true"] {
             </section>
 
             <!-- === APPENDIX H: FOUR COMPLEMENTARY INSTRUCTION MECHANISMS === -->
-            <section class="slide context-appendix standards-appendix" data-slide="34">
+            <section class="slide context-appendix standards-appendix" data-slide="30" data-edit-offset="49">
                 <div class="nordic-wrap">
                     <header class="header-bar">
                         <div class="badge-group">
                             <span class="badge">APPENDIX H</span>
                             <span class="badge badge-teal">VERSIONED ENGINEERING INSTRUCTIONS</span>
                         </div>
-                        <div class="page-indicator">SLIDE 34 / 34</div>
+                        <div class="page-indicator">SLIDE 30 / 33</div>
                     </header>
                     <div class="title-section reveal d1">
                         <h2 class="slide-title">附录 H：“四级架构规范”，<br><span>实质是四类可组合的工程指令</span></h2>
@@ -4894,6 +4515,166 @@ body.editing-active [data-editable="true"] {
                 </div>
             </section>
 
+            <!-- === APPENDIX I: CODE, SPEC AND KNOWLEDGE REPOSITORY BOUNDARIES === -->
+            <section class="slide context-appendix" data-slide="31" data-edit-namespace="repo-layout">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">APPENDIX I</span>
+                            <span class="badge badge-teal">CO-LOCATE · GOVERN · CONNECT</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 31 / 33</div>
+                    </header>
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">附录 I：代码、Spec 与知识库，<br><span>同仓交付，分仓治理，统一检索</span></h2>
+                        <div class="slide-subtitle" data-edit-revision="spec-git-summary">推荐混合式：按<strong>权限、责任与版本</strong>划边界，<br>先同仓起步，有真实需求再分仓。</div>
+                    </div>
+                    <div class="context-body reveal d2">
+                        <div class="grid-3">
+                            <div class="float-card">
+                                <span class="context-label">01 / CO-LOCATE</span>
+                                <h3 data-edit-revision="spec-git-summary">随实现变化，优先同仓</h3>
+                                <p data-edit-revision="spec-git-summary">功能 Spec、验收用例、服务级 ADR、运行手册与私有契约，随代码一起评审和版本化。</p>
+                                <p class="context-note" data-edit-revision="spec-git-summary"><strong>起步：</strong>一个实现仓 + specs/ + docs/。Spec 表达预期，契约与测试验证实现；同仓不自动保证一致。</p>
+                            </div>
+                            <div class="float-card">
+                                <span class="context-label">02 / GOVERN</span>
+                                <h3>跨团队共享，按边界分仓</h3>
+                                <p data-edit-revision="spec-git-summary">企业标准、跨系统 RFC 集中治理；共享契约独立发布时可分仓。产品文档按团队与发布节奏选择。</p>
+                                <p class="context-note" data-edit-revision="spec-git-summary"><strong>同步：</strong>明确 Owner、版本与状态，保留决策历史，避免双主；跨仓用关联 PR、评审和发布回写。</p>
+                            </div>
+                            <div class="float-card navy-card">
+                                <span class="context-label">03 / CONNECT</span>
+                                <h3 data-edit-revision="spec-git-summary">统一检索，不等于全量入模</h3>
+                                <p data-edit-revision="spec-git-summary">门户连接权威源，Agent 按任务、版本与授权取证；业务知识留在合适系统，不必全部迁入 Git。</p>
+                                <p class="context-note" data-edit-revision="spec-git-summary"><strong>权限：</strong>CODEOWNERS 不控制读取；私有源仓不保证站点、索引和检索私有，须逐层核查授权。</p>
+                            </div>
+                        </div>
+                        <div class="context-band">
+                            <p data-edit-revision="spec-git-summary"><strong>决策顺序：</strong>读取权限 → 共同变更频率 → 责任与生命周期 → 同步成本；不按人数或文档数量机械拆仓。</p>
+                        </div>
+                    </div>
+                    <nav class="context-sources" aria-label="Appendix I repository organization sources">
+                        <a href="https://github.com/github/spec-kit/blob/a60bd9bad5af2d25df42188330e8281f2dd1c8bb/templates/plan-template.md#L45-L101" target="_blank" rel="noopener noreferrer">Spec Kit · 功能规格同仓</a>
+                        <a href="https://backstage.io/docs/features/techdocs/creating-and-publishing/" target="_blank" rel="noopener noreferrer">Backstage · 分散维护、统一入口</a>
+                        <a href="https://github.com/rust-lang/rfcs/blob/3bdcd22feea6848a7920fa06d17ad4c6ada9db89/README.md#L98-L108" target="_blank" rel="noopener noreferrer">Rust RFC · 提案分仓</a>
+                        <a href="https://github.blog/ai-and-ml/github-copilot/automating-cross-repo-documentation-with-github-agentic-workflows/" target="_blank" rel="noopener noreferrer">Aspire · 跨仓同步</a>
+                        <span>公开实践参考，非统一强制标准。</span>
+                    </nav>
+                    <footer class="bottom-strip">
+                        <div data-edit-revision="spec-git-summary"><strong>追溯链：</strong>RFC → Spec → Issue / PR → Commit SHA → 测试 → 发布版本；获批 ≠ 已上线，验收需固定版本。</div>
+                        <div class="context-label">I / REPOSITORY STRATEGY</div>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- === APPENDIX J: ASPIRE CROSS-REPOSITORY DOCUMENTATION AUTOMATION === -->
+            <section class="slide context-appendix" data-slide="32" data-edit-namespace="aspire-docs">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">APPENDIX J</span>
+                            <span class="badge badge-teal">ASPIRE · CROSS-REPO DOCS AUTOMATION</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 32 / 33</div>
+                    </header>
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">附录 J：Aspire 跨仓文档管理，<br><span>代码合并后，文档草稿自动跟进</span></h2>
+                        <div class="slide-subtitle">产品代码与文档分仓，<br>用受控自动化连接<strong>变更、版本与审核</strong>。</div>
+                    </div>
+                    <div class="context-body reveal d2">
+                        <div class="grid-3">
+                            <div class="float-card">
+                                <span class="context-label">01 / CODE → SIGNAL</span>
+                                <h3>产品仓：用变更触发任务</h3>
+                                <p><strong>microsoft/aspire</strong> 的 PR 合并触发工作流，提取 Diff、关联 Issue 与版本元数据。</p>
+                                <p class="context-note"><strong>版本先定：</strong>脚本解析 Milestone 与发布分支，核对文档仓目标；不让 Agent 猜版本。</p>
+                            </div>
+                            <div class="float-card">
+                                <span class="context-label">02 / AGENT → DRAFT</span>
+                                <h3>文档仓：按规范生成草稿</h3>
+                                <p>Agent 筛选用户可见变化，按既有写作规范，在 <strong>microsoft/aspire.dev</strong> 起草更新。</p>
+                                <p class="context-note"><strong>受控写入：</strong>确需更新才通过 safe-outputs 创建 Draft PR；Agent 不直接合并。</p>
+                            </div>
+                            <div class="float-card navy-card">
+                                <span class="context-label">03 / REVIEW → TRACE</span>
+                                <h3>工程师：审阅并回写证据</h3>
+                                <p>邀请来源 PR 的领域专家复核，文档合并仍由人确认；文档 PR 链接回写产品 PR。</p>
+                                <p class="context-note"><strong>结果核验：</strong>区分已起草、无需更新与起草失败，确认真实 PR，避免把失败当成功。</p>
+                            </div>
+                        </div>
+                        <div class="context-band">
+                            <p><strong>案例结果：</strong>396 次触发 → 82 个文档 PR 全部合并；代码合并至文档合并中位 44.8 小时。</p>
+                            <p><strong>治理边界：</strong>最小权限 App + 受限目标仓与分支 + 保护文件 + 人工审核；自动起草，不自动合并。</p>
+                        </div>
+                    </div>
+                    <nav class="context-sources" aria-label="Appendix J Aspire documentation automation sources">
+                        <a href="https://github.blog/ai-and-ml/github-copilot/automating-cross-repo-documentation-with-github-agentic-workflows/" target="_blank" rel="noopener noreferrer">GitHub · 官方案例</a>
+                        <a href="https://github.com/microsoft/aspire/blob/cfda6e1cddc0f34383ef879f3bfcc34e8a4d8132/.github/workflows/pr-docs-check.md" target="_blank" rel="noopener noreferrer">Aspire · 工作流快照</a>
+                        <a href="https://github.github.com/gh-aw/reference/safe-outputs/" target="_blank" rel="noopener noreferrer">Safe outputs</a>
+                        <span>统计窗：2026.05.03–06.02；合并率不代表准确率。实现已演进，以源码为准。</span>
+                    </nav>
+                    <footer class="bottom-strip">
+                        <div><strong>CIO 启示：</strong>仓库可以分开，交付责任不能断开；让机器人起草，让工程师为准确性负责。</div>
+                        <div class="context-label">J / DOCS AUTOMATION</div>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- === APPENDIX K: ENTERPRISE ADOPTION OF SPEC-DRIVEN DEVELOPMENT === -->
+            <section class="slide context-appendix" data-slide="33" data-edit-namespace="sdd-enterprise">
+                <div class="nordic-wrap">
+                    <header class="header-bar">
+                        <div class="badge-group">
+                            <span class="badge">APPENDIX K</span>
+                            <span class="badge badge-teal">SPEC KIT · ENTERPRISE ADOPTION</span>
+                        </div>
+                        <div class="page-indicator">SLIDE 33 / 33</div>
+                    </header>
+                    <div class="title-section reveal d1">
+                        <h2 class="slide-title">附录 K：SDD 企业推广，<br><span>稳定内核，分层定制，受控交付</span></h2>
+                        <div class="slide-subtitle">基于 Microsoft Developer 2026.10.07 文章，<br>用可治理组件推广，而不是逐队 fork 核心。</div>
+                    </div>
+                    <div class="context-body reveal d2">
+                        <div class="grid-3">
+                            <div class="float-card">
+                                <span class="context-label">01 / STANDARDIZE</span>
+                                <h3>标准分层，保留团队差异</h3>
+                                <p><strong>Constitution</strong> 定义组织基线、领域／技术栈与团队规则；<strong>Preset</strong> 定制已有模板与命令。</p>
+                                <p class="context-note"><strong>新增能力用 Extension：</strong>接入内部工具、领域检查与质量验证，不为每队 fork 核心。</p>
+                            </div>
+                            <div class="float-card">
+                                <span class="context-label">02 / DISTRIBUTE</span>
+                                <h3>审核组件，版本化分发</h3>
+                                <p><strong>Catalog</strong> 管发现与安装来源；<strong>Bundle</strong> 将审核过的组件组合为版本化工程包。</p>
+                                <p class="context-note"><strong>让正确路径最容易：</strong>组件有负责人、来源和版本；先审查再分发，分批升级并验证生效。</p>
+                            </div>
+                            <div class="float-card navy-card">
+                                <span class="context-label">03 / ADOPT &amp; GOVERN</span>
+                                <h3>渐进推广，保留人工判断</h3>
+                                <p><strong>Workflow</strong> 编排命令、脚本与人工检查点；先跑通流程，再自动化规格、计划、实现与验证。</p>
+                                <p class="context-note"><strong>强制控制另行配置：</strong>模板与目录不是硬门禁；关键要求靠受保护 CI、Rulesets 与必要评审。</p>
+                            </div>
+                        </div>
+                        <div class="context-band">
+                            <p><strong>推广顺序：</strong>明确基线 → 小范围试点 → 审核组件 → 组织目录 → 成熟组合打包 → 流程自动化。</p>
+                            <p><strong>成效口径：</strong>看交付周期、缺陷与返工、总评审投入和总成本，不以安装量或生成代码量代替收益。</p>
+                        </div>
+                    </div>
+                    <nav class="context-sources" aria-label="Appendix K enterprise SDD adoption sources">
+                        <a href="https://developer.microsoft.com/blog/from-spec-first-to-enterprise-ready-extending-github-spec-kit/" target="_blank" rel="noopener noreferrer">Microsoft Developer · 2026.10.07</a>
+                        <a href="https://github.com/github/spec-kit/blob/32852b5e496d8f47978a92796fedf401ae2ea270/docs/presets/overview.md" target="_blank" rel="noopener noreferrer">Spec Kit · 预设与分层</a>
+                        <a href="https://github.github.io/spec-kit/overview/catalogs.html" target="_blank" rel="noopener noreferrer">目录与信任边界</a>
+                        <a href="https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets" target="_blank" rel="noopener noreferrer">GitHub · 合并门禁</a>
+                        <span>原文提供推广设计，并非企业 ROI 实证。</span>
+                    </nav>
+                    <footer class="bottom-strip">
+                        <div><strong>CIO 启示：</strong>将工程标准产品化：让团队复用受治理的能力，而不是重复维护工具分叉与个人 Prompt。</div>
+                        <div class="context-label">K / ENTERPRISE SDD</div>
+                    </footer>
+                </div>
+            </section>
+
         </div>
     </main>
 
@@ -4904,7 +4685,7 @@ body.editing-active [data-editable="true"] {
             <div class="nav-progress-track">
                 <div class="nav-progress-fill" id="progressFill"></div>
             </div>
-            <span id="slideCounter">01 / 34</span>
+            <span id="slideCounter">01 / 33</span>
             <button class="nav-btn" id="nextBtn" aria-label="Next slide">NEXT</button>
             <span class="nav-divider" aria-hidden="true"></span>
             <button class="nav-btn fullscreen-btn" id="fullscreenBtn" aria-label="Toggle fullscreen presentation" title="快捷键: F">
@@ -5084,7 +4865,7 @@ class SlidePresentation {
                 el.dataset.origText = el.textContent.trim();
             }
             const raw = el.dataset.origText;
-            // Skip dotted capability numbers like 2.1 - 2.6
+            // Skip dotted capability numbers like 2.1 - 2.7
             if (/^\d+\.\d+$/.test(raw)) return;
             const match = raw.match(/^([^\d+-]*[+-]?)(\d+)(.*)$/);
             if (!match) return;
@@ -5133,9 +4914,25 @@ class InlineDeckEditor {
     init() {
         const selectors = 'h1, h2, h3, p, .float-title, .float-lead, .tag-item, .slide-subtitle, .bottom-strip div:first-child, .cover-kpi-label, .cover-kpi-desc';
         this.editableElements = Array.from(document.querySelectorAll(selectors));
-        this.editableElements.forEach((el, idx) => {
+        let legacyIndex = 0;
+        const namespaceIndexes = new Map();
+        this.editableElements.forEach((el) => {
             el.dataset.editable = 'true';
-            el.dataset.editId = `edit-${idx}`;
+            const slide = el.closest('.slide');
+            const namespace = slide?.dataset.editNamespace;
+            let editId;
+            if (namespace) {
+                const index = namespaceIndexes.get(namespace) ?? 0;
+                editId = `edit-${namespace}-${index}`;
+                namespaceIndexes.set(namespace, index + 1);
+            } else {
+                // New slides must not shift IDs saved before the demo chapter was removed.
+                const offset = Number(slide?.dataset.editOffset ?? 0);
+                editId = `edit-${legacyIndex + offset}`;
+                legacyIndex += 1;
+            }
+            const revision = el.dataset.editRevision;
+            el.dataset.editId = revision ? `${editId}-${revision}` : editId;
         });
 
         this.restoreEdits();
