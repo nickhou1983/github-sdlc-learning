@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 时代快速迭代下的开发自测闭环与 VS Code 黄金测试场景解析</title>
+
+    <!-- Google Fonts: Source Serif 4, DM Sans, IBM Plex Mono, Noto Sans SC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (SIGNAL EDITORIAL SYSTEM)
+           Dual surface: Deep Editorial Navy (#1C2644) & Warm Cream (#F0ECE3)
+           Single Accent: Antique Gold (#C8A870)
+           =========================================== */
+        :root {
+            --stage-bg: #0E1424;
+            --slide-bg: #1C2644;
+
+            /* Signal Palette */
+            --navy: #1C2644;
+            --navy-alt: #232F55;
+            --cream: #F0ECE3;
+            --cream-alt: #E6E0D4;
+            --text-warm: #E2DCD0;
+            --text-muted-dark: #8A96A8;
+            --text-hint-dark: #5C6B82;
+            --ink: #1A2030;
+            --text-muted-light: #4A5260;
+            --text-hint-light: #7A8290;
+            --gold: #C8A870;
+            --gold-dim: rgba(200, 168, 112, 0.16);
+            --border-dark: #2E3D5C;
+            --border-light: #CAC4B4;
+
+            /* Typography Families (CJK consolidated to Noto Sans SC per Signal spec) */
+            --font-serif: 'Source Serif 4', 'Noto Sans SC', Georgia, serif;
+            --font-sans: 'DM Sans', 'Noto Sans SC', sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Noto Sans SC', monospace;
+
+            /* Fixed 1920x1080 Stage Spacing */
+            --pad-x: 112px;
+            --pad-y: 44px;
+
+            /* Animation Easing */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.55s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===========================================
+           FIXED 16:9 STAGE: MANDATORY BASE STYLES
+           Include this ENTIRE file in every presentation.
+           Slides are authored at 1920×1080 and scaled as a whole.
+           =========================================== */
+
+        /* 1. Lock the browser viewport */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 2. Full-window deck viewport */
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 3. Fixed 16:9 design canvas.
+           JavaScript sets transform: translate(...) scale(...). */
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        /* 4. Slides stack inside the fixed stage.
+           Content must be laid out at 1920×1080, not reflowed per device. */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        /* 5. Keep media inside authored slide bounds */
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* 6. Presentation chrome stays outside the slide design system */
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        /* 7. Print one fixed-size slide per page */
+        @media print {
+            html,
+            body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-stage {
+                position: static;
+                width: auto;
+                height: auto;
+                transform: none !important;
+                background: none;
+            }
+
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .deck-controls {
+                display: none !important;
+            }
+        }
+
+        /* 8. Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition: none !important;
+            }
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* ===========================================
+           SURFACE SYSTEM (NAVY & CREAM)
+           =========================================== */
+        .slide.surface-navy {
+            background-color: var(--navy);
+            color: var(--text-warm);
+            --curr-fg: var(--text-warm);
+            --curr-muted: var(--text-muted-dark);
+            --curr-hint: var(--text-hint-dark);
+            --curr-border: var(--border-dark);
+            --curr-panel: var(--navy-alt);
+        }
+
+        .slide.surface-cream {
+            background-color: var(--cream);
+            color: var(--ink);
+            --curr-fg: var(--ink);
+            --curr-muted: var(--text-muted-light);
+            --curr-hint: var(--text-hint-light);
+            --curr-border: var(--border-light);
+            --curr-panel: var(--cream-alt);
+        }
+
+        /* Standard Slide Grid: Chrome Top, Body 1fr, Foot Bottom */
+        .slide-frame {
+            width: 1920px;
+            height: 1080px;
+            padding: 44px var(--pad-x) 72px var(--pad-x);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+        }
+
+        /* Chrome Bar & Foot Bar */
+        .chrome-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--curr-border);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--curr-muted);
+        }
+
+        .chrome-bar .latin-track {
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .chrome-bar .gold-text {
+            color: var(--gold);
+        }
+
+        .foot-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 14px;
+            border-top: 1px solid var(--curr-border);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--curr-muted);
+        }
+
+        /* ===========================================
+           TYPOGRAPHY & SIGNATURE TREATMENTS
+           =========================================== */
+        .kicker-block {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .rule-short {
+            width: 36px;
+            height: 1px;
+            background: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .kicker {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gold);
+            letter-spacing: 0.12em;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 3px 10px;
+            letter-spacing: 0.08em;
+        }
+
+        .h-display {
+            font-family: var(--font-serif);
+            font-size: 68px;
+            font-weight: 700;
+            line-height: 1.18;
+            color: var(--curr-fg);
+            margin-bottom: 24px;
+        }
+
+        .h-chapter {
+            font-family: var(--font-serif);
+            font-size: 58px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--curr-fg);
+            margin-bottom: 22px;
+        }
+
+        .h-section {
+            font-family: var(--font-serif);
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 1.22;
+            color: var(--curr-fg);
+            margin-bottom: 10px;
+        }
+
+        .h-sub {
+            font-family: var(--font-serif);
+            font-size: 23px;
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--curr-fg);
+            margin-bottom: 8px;
+        }
+
+        /* Signal Moment: CJK color shift to antique gold, Latin italic gold */
+        h1 em, h2 em, h3 em, .h-display em, .h-chapter em, .h-section em, .lead em {
+            color: var(--gold);
+            font-style: normal;
+        }
+
+        .latin-em {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-style: italic !important;
+            color: var(--gold);
+        }
+
+        .lead {
+            font-family: var(--font-sans);
+            font-size: 21px;
+            line-height: 1.68;
+            color: var(--curr-muted);
+        }
+
+        .body-copy {
+            font-family: var(--font-sans);
+            font-size: 17px;
+            line-height: 1.72;
+            color: var(--curr-muted);
+        }
+
+        .mono-note {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--curr-hint);
+        }
+
+        .stat-num {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 52px;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: var(--gold);
+        }
+
+        /* Em-dash Bullet List */
+        .signal-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .signal-list li {
+            position: relative;
+            padding-left: 28px;
+            font-family: var(--font-sans);
+            font-size: 16.5px;
+            line-height: 1.65;
+            color: var(--curr-fg);
+        }
+
+        .signal-list li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-family: var(--font-mono);
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .signal-list li span.muted {
+            color: var(--curr-muted);
+        }
+
+        /* ===========================================
+           EDITORIAL LAYOUT COMPONENTS
+           =========================================== */
+        .slide-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .header-band {
+            margin-bottom: 0;
+        }
+
+        /* Hairline Grid Columns */
+        .cols-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--curr-border);
+            border-bottom: 1px solid var(--curr-border);
+            flex: 1;
+        }
+
+        .cols-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--curr-border);
+            border-bottom: 1px solid var(--curr-border);
+            flex: 1;
+        }
+
+        .cols-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--curr-border);
+            border-bottom: 1px solid var(--curr-border);
+            flex: 1;
+        }
+
+        .col-cell {
+            padding: 24px 28px;
+            border-right: 1px solid var(--curr-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .col-cell:first-child {
+            padding-left: 0;
+        }
+
+        .col-cell:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .col-cell > .mono-note {
+            padding-top: 12px;
+            border-top: 1px dashed var(--curr-border);
+        }
+
+        /* Cycle Step Cards (2px gold top border per Signal spec) */
+        .cycle-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .cycle-step {
+            background: var(--curr-panel);
+            border: 1px solid var(--curr-border);
+            border-top: 2px solid var(--gold);
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .step-num {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--gold);
+            letter-spacing: 0.1em;
+        }
+
+        /* Pyramid / Tiered Bands */
+        .tier-stack {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .tier-band {
+            border: 1px solid var(--curr-border);
+            border-top: 1px solid var(--gold);
+            padding: 20px 26px;
+            background: var(--curr-panel);
+            display: grid;
+            grid-template-columns: 220px 1fr 330px;
+            gap: 26px;
+            align-items: center;
+            flex: 1;
+        }
+
+        /* Editorial Table */
+        .editorial-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-sans);
+        }
+
+        .editorial-table th {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gold);
+            text-align: left;
+            padding: 12px 18px 12px 0;
+            border-top: 1px solid var(--curr-border);
+            border-bottom: 1px solid var(--curr-border);
+            letter-spacing: 0.08em;
+        }
+
+        .editorial-table td {
+            padding: 14px 18px 14px 0;
+            border-bottom: 1px solid var(--curr-border);
+            font-size: 16px;
+            line-height: 1.58;
+            vertical-align: top;
+            color: var(--curr-fg);
+        }
+
+        .editorial-table td.muted-cell {
+            color: var(--curr-muted);
+        }
+
+        /* Callout Strip */
+        .boundary-strip {
+            border-top: 1px solid var(--gold);
+            border-bottom: 1px solid var(--curr-border);
+            padding: 14px 22px;
+            background: var(--curr-panel);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .boundary-label {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--gold);
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        .boundary-text {
+            font-family: var(--font-sans);
+            font-size: 15.5px;
+            line-height: 1.55;
+            color: var(--curr-fg);
+            flex: 1;
+        }
+
+        /* Vertical Timeline Spine */
+        .vt-list {
+            position: relative;
+            border-left: 1px solid var(--curr-border);
+            margin-left: 8px;
+            padding-left: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 18px;
+            flex: 1;
+        }
+
+        .vt-item {
+            position: relative;
+        }
+
+        .vt-item::before {
+            content: "";
+            position: absolute;
+            left: -33px;
+            top: 7px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--gold);
+        }
+
+        /* Code / Config Snippet Box */
+        .code-ledger {
+            font-family: var(--font-mono);
+            font-size: 13.5px;
+            line-height: 1.55;
+            background: var(--curr-panel);
+            border: 1px solid var(--curr-border);
+            border-top: 1px solid var(--gold);
+            padding: 14px 18px;
+            color: var(--curr-fg);
+            white-space: pre-wrap;
+        }
+
+        /* ===========================================
+           ENTRANCE ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.active .reveal,
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .d1 { transition-delay: 0.05s; }
+        .d2 { transition-delay: 0.14s; }
+        .d3 { transition-delay: 0.22s; }
+        .d4 { transition-delay: 0.30s; }
+
+        /* ===========================================
+           NAVIGATION & INLINE EDITING CONTROLS
+           (Outside 1920x1080 Stage)
+           =========================================== */
+        .deck-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(14, 20, 36, 0.92);
+            border: 1px solid #2E3D5C;
+            padding: 6px 16px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #E2DCD0;
+            user-select: none;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid #2E3D5C;
+            color: #C8A870;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            border-color: #C8A870;
+            background: rgba(200, 168, 112, 0.12);
+        }
+
+        .nav-dots {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .nav-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4E5A6E;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: #C8A870;
+            transform: scale(1.25);
+        }
+
+        /* Inline Editing Hotzone & Toggle (JS-controlled with 400ms grace timeout) */
+        .edit-hotzone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 80px;
+            z-index: 10000;
+            cursor: pointer;
+        }
+
+        .edit-toggle {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            background: #1C2644;
+            color: #C8A870;
+            border: 1px solid #C8A870;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 6px 12px;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10001;
+        }
+
+        .edit-toggle.show,
+        .edit-toggle.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .edit-toggle.active {
+            background: #C8A870;
+            color: #1A2030;
+            font-weight: 600;
+        }
+
+        [contenteditable="true"] {
+            outline: 1px dashed #C8A870;
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Inline Edit Controls -->
+    <div class="edit-hotzone" id="editHotzone"></div>
+    <button class="edit-toggle" id="editToggle" title="切换编辑模式 (快捷键 E / Ctrl+S 保存)">✎ EDIT DECK</button>
+
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+
+            <!-- ===========================================
+                 SLIDE 01: COVER (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy active visible">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">BRIEFING // GITHUB SDLC &amp; QUALITY ARCHITECTURE</span>
+                        <span class="gold-text">TECHNICAL ADVISORY DOSSIER</span>
+                        <span class="latin-track">FOLIO 01 / 12</span>
+                    </header>
+
+                    <div class="slide-body" style="justify-content: center;">
+                        <div style="display: grid; grid-template-columns: 1.38fr 0.82fr; gap: 68px; align-items: center;">
+                            <div class="reveal d2">
+                                <div class="kicker-block">
+                                    <span class="rule-short"></span>
+                                    <span class="kicker">EXECUTIVE BRIEFING · 客户核心问题答复与工程拆解</span>
+                                </div>
+                                <h1 class="h-display">AI 时代快速迭代下的<br><em>开发自测闭环</em>与<br>VS Code <em>黄金测试场景</em></h1>
+                                <p class="lead" style="max-width: 920px; margin-bottom: 28px;">
+                                    面向无专职 QA 团队的高频交付研发组织：依托 GitHub Issue、Pull Request、GitHub Copilot 与 GitHub Actions 构建<em>变更识别—用例构建—靶向回归—脚本自愈</em>的质量工程体系，并深度拆解 VS Code 团队如何生成与落地 <span class="latin-em">Golden Test Scenarios</span>。
+                                </p>
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <span class="tag-pill">01. 版本变更精准提取</span>
+                                    <span class="tag-pill">02. 自测用例集与四重门禁</span>
+                                    <span class="tag-pill">03. 风险分层与精准回归</span>
+                                    <span class="tag-pill">04. 测试脚本韧性与低成本适配</span>
+                                    <span class="tag-pill">05. VS Code 黄金测试场景拆解</span>
+                                </div>
+                            </div>
+
+                            <aside style="border-left: 1px solid var(--curr-border); padding-left: 44px; display: flex; flex-direction: column; gap: 22px;" class="reveal d3">
+                                <div style="padding-bottom: 18px; border-bottom: 1px solid var(--curr-border);">
+                                    <div class="step-num">PART I · GITHUB PLATFORM RESPONSE</div>
+                                    <h3 class="h-sub" style="margin-top: 6px;">开发团队内部自测的四大工程解法</h3>
+                                    <p class="body-copy" style="font-size: 15.5px;">针对“改了什么不清楚、无 QA 难建全面用例、全量回归成本高、脚本频繁失效”四大痛点给出可落地的平台组合拳。</p>
+                                </div>
+                                <div style="padding-bottom: 18px; border-bottom: 1px solid var(--curr-border);">
+                                    <div class="step-num">PART II · VS CODE GOLDEN SCENARIOS</div>
+                                    <h3 class="h-sub" style="margin-top: 6px;">端到端真实用户旅程评估方法论</h3>
+                                    <p class="body-copy" style="font-size: 15.5px;">剖析 <span style="font-family:var(--font-mono);color:var(--gold);">microsoft/vscode#283671</span>（Kaggle 竞赛 Notebook 黄金场景），解析黄金场景、Test Plan Item 与 Smoke Test 的三层协同。</p>
+                                </div>
+                                <div>
+                                    <div class="step-num">CORE PRINCIPLE · 核心责任边界</div>
+                                    <p class="body-copy" style="font-size: 15.5px; color: var(--text-warm);">AI 负责加速变更提炼、候选用例与脚本修复；<em>业务规则正确性与验收标准</em>始终由开发团队主导确认。</p>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>GITHUB PLATFORM · GITHUB COPILOT · GITHUB ACTIONS</span>
+                        <span>按键 ← / → 或空格翻页 · 按 E 键开启页内文本编辑</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 02: EXECUTIVE SUMMARY & CLOSED LOOP (CREAM)
+                 =========================================== -->
+            <section class="slide surface-cream">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">SECTION 01 // ARCHITECTURAL OVERVIEW</span>
+                        <span class="gold-text">开发自测闭环全景图</span>
+                        <span class="latin-track">FOLIO 02 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">EXECUTIVE SUMMARY · 客户痛点与 GitHub 平台能力映射</span>
+                            </div>
+                            <h2 class="h-section">以 GitHub + Copilot + Actions 构建<em>四步开发自测闭环</em></h2>
+                            <p class="lead" style="font-size: 19px;">在 AI 加速编码、版本高频演进的背景下，单靠人工记忆或每次跑全量测试均不可持续，需将测试左移并嵌入日常 PR 工作流。</p>
+                        </div>
+
+                        <div class="cycle-grid-4 reveal d2" style="flex: 1;">
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 01 / 变更识别</div>
+                                <h3 class="h-sub">获取版本修改与新增功能</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">通过 Issue 关联 PR、PR 模板结构化声明、Release 自动生成变更清单（<span style="font-family:var(--font-mono);">release.yml</span>）与 Copilot 变更摘要，消除“漏测暗改”。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 02 / 用例构建与质控</div>
+                                <h3 class="h-sub">快速生成全面自测用例集</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">采用“先生成 6 类场景清单 → 开发确认业务预期 → 再生成测试代码”两步法，配合 CR、CI 门禁与变异测试保障用例质量。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 03 / 靶向功能回归</div>
+                                <h3 class="h-sub">按变更影响面分层执行</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">建立“模块—接口—测试集—测试数据”映射，利用 Actions 路径/条件过滤实现 PR 级靶向验证，将全量回归放到夜间与发版前。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 04 / 脚本兼容演进</div>
+                                <h3 class="h-sub">低成本适配高频版本迭代</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">用 <span style="font-family:var(--font-mono);">copilot-instructions.md</span> 统一测试规范，抽离公共调用层与稳定定位符，让测试脚本随功能 PR 同步演进。</p>
+                            </div>
+                        </div>
+
+                        <div class="reveal d3">
+                            <table class="editorial-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 18%;">客户关注问题</th>
+                                        <th style="width: 26%;">开发自测典型痛点</th>
+                                        <th style="width: 30%;">GitHub 平台核心抓手</th>
+                                        <th style="width: 26%;">关键工程控制点（防踩坑）</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>1. 获取版本修改与新功能</strong></td>
+                                        <td class="muted-cell">提交零散、口头同步遗漏、不知道影响哪些上下游</td>
+                                        <td>Issues 验收标准 + PR 模板/标签 + 自动 Release Notes + Copilot PR 摘要</td>
+                                        <td class="muted-cell">自动 Release Notes 基于合并 PR，需复核跨 PR 组合特性</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>1.1 用例设计与质量保障</strong></td>
+                                        <td class="muted-cell">无专职 QA，开发只测 Happy Path，断言流于形式</td>
+                                        <td>Copilot 场景矩阵生成 + Copilot Code Review + Actions 门禁</td>
+                                        <td class="muted-cell">严禁直接按实现代码反推预期，防把代码 Bug 固化为通过断言</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>1.2 高效针对性功能测试</strong></td>
+                                        <td class="muted-cell">每次全量回归耗时长、测试数据与环境资源争抢</td>
+                                        <td>Actions 路径感知 + 三级分层回归 + 按需造数 / Fixture 清理</td>
+                                        <td class="muted-cell">Required Check 若因路径过滤跳过会一直 Pending，需用 Gate Job</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>2. 测试脚本兼容性</strong></td>
+                                        <td class="muted-cell">UI/接口频繁微调导致大面积脚本报错，维护负重</td>
+                                        <td>仓库级自定义指令 + 稳定 <span style="font-family:var(--font-mono);">data-testid</span> + Copilot 辅助修脚本</td>
+                                        <td class="muted-cell">将测试脚本更新纳入 PR DoD，隔离治理 Flaky 不稳定测试</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>PART I · GITHUB SELF-TESTING ARCHITECTURE</span>
+                        <span>AI ASSISTS GENERATION · DEVELOPERS OWN BUSINESS EXPECTATIONS</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 03: QUESTION 1 - IDENTIFYING VERSION CHANGES (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">QUESTION 01 // CHANGE INTELLIGENCE</span>
+                        <span class="gold-text">如何获取当前版本修改和新增哪些功能</span>
+                        <span class="latin-track">FOLIO 03 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">TRACEABILITY CHAIN · 从需求源头到版本发布的四级变更提取</span>
+                            </div>
+                            <h2 class="h-section">打通 Issue → PR → Release 链路，将代码差异转化为<em>可测试的变更清单</em></h2>
+                            <p class="lead" style="font-size: 18.5px;">核心思路：不靠发布前临时盘点，而在日常提交与合并时通过结构化元数据沉淀变更上下文，再由 GitHub 与 Copilot 自动聚合。</p>
+                        </div>
+
+                        <div class="cols-4 reveal d2">
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">01 / ISSUE 源头定义</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">需求背景与验收标准</h3>
+                                    <ul class="signal-list" style="margin-top: 12px;">
+                                        <li>使用 Issue Forms 强制填写<strong>业务目标、预期行为、边界约束与验收标准（AC）</strong>。</li>
+                                        <li>开发分支与 PR 通过 <span style="font-family:var(--font-mono);color:var(--gold);">Fixes #123</span> 绑定对应 Issue，确保每一处代码改动都有业务出处。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">SOURCE OF TRUTH: BUSINESS AC</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">02 / PULL REQUEST 归集</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">PR 模板与分类标签</h3>
+                                    <ul class="signal-list" style="margin-top: 12px;">
+                                        <li>在 <span style="font-family:var(--font-mono);color:var(--gold);">pull_request_template.md</span> 中要求勾选：变更类型、影响模块、数据库/配置变更、建议自测点。</li>
+                                        <li>统一打上 <span style="font-family:var(--font-mono);">feature</span> / <span style="font-family:var(--font-mono);">bugfix</span> / <span style="font-family:var(--font-mono);">breaking-change</span> / <span style="font-family:var(--font-mono);">api</span> 等 Label。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">METADATA: LABELS &amp; IMPACT SCOPE</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">03 / RELEASE 自动生成</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">Tag 对比与分类日志</h3>
+                                    <ul class="signal-list" style="margin-top: 12px;">
+                                        <li>基于两版本 Tag 之间的合并 PR 与提交差异，一键生成 Release Notes。</li>
+                                        <li>配置 <span style="font-family:var(--font-mono);color:var(--gold);">.github/release.yml</span> 按标签自动分栏（新增功能、缺陷修复、破坏性变更）并过滤纯文档/杂项。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">AUTOMATION: .GITHUB/RELEASE.YML</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">04 / COPILOT 提炼输出</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">面向测试的四维摘要</h3>
+                                    <ul class="signal-list" style="margin-top: 12px;">
+                                        <li>对大型 PR 或版本 PR 列表，使用 Copilot 汇总：<strong>① 变更功能点、② 影响模块与接口、③ 潜在回归风险、④ 建议重点验证项</strong>。</li>
+                                        <li>直接作为当前版本自测范围输入。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">OUTPUT: TESTABLE CHANGE BRIEF</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 32px; align-items: stretch;" class="reveal d3">
+                            <div class="code-ledger"># .github/release.yml 示例：按标签自动归类版本变更
+changelog:
+  exclude:
+    labels: ["ignore-for-release", "chore", "docs-only"]
+  categories:
+    - title: "Breaking Changes &amp; 重点回归"
+      labels: ["breaking-change", "db-migration"]
+    - title: "New Features / 新增功能"
+      labels: ["feature", "enhancement"]
+    - title: "Bug Fixes / 缺陷修复"
+      labels: ["bug", "hotfix"]</div>
+
+                            <div class="boundary-strip" style="height: 100%;">
+                                <div>
+                                    <div class="boundary-label" style="margin-bottom: 6px;">REALISTIC BOUNDARY · 实施前提与边界说明</div>
+                                    <p class="boundary-text">
+                                        GitHub 自动生成的 Release Notes 与 Copilot 摘要均基于<strong>已合并的 PR 标题、描述、标签及代码 Diff</strong>。若团队存在直接向主干推代码、多个功能混在一个超大 PR、或 PR 描述缺失的情况，提取准确度会显著下降——需先用分支保护规则强制走 PR 流程。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>QUESTION 1 · VERSION CHANGE DISCOVERY</span>
+                        <span>ISSUE FORMS + PR TEMPLATES + RELEASE.YML + COPILOT SUMMARY</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 04: QUESTION 1.1A - DESIGNING TEST CASES (CREAM)
+                 =========================================== -->
+            <section class="slide surface-cream">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">QUESTION 01.1 (PART A) // TEST CASE DESIGN</span>
+                        <span class="gold-text">无专职 QA 团队如何快速构建准确全面的自测用例集</span>
+                        <span class="latin-track">FOLIO 04 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">TWO-STAGE GENERATION · 先对齐测试场景矩阵，再生成可执行测试代码</span>
+                            </div>
+                            <h2 class="h-section">避免“让 AI 直接写测试代码”的盲区：<em>先出六维场景清单，再转自动化脚本</em></h2>
+                            <p class="lead" style="font-size: 18.5px;">开发自测最容易犯的错误是直接根据刚写完的实现代码生成单元测试——如果代码逻辑写错了，生成的测试就会把 Bug 当成正确预期固化下来。</p>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; flex: 1; border-top: 1px solid var(--curr-border); border-bottom: 1px solid var(--curr-border); padding: 22px 0;" class="reveal d2">
+                            <div style="border-right: 1px solid var(--curr-border); padding-right: 36px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div class="step-num" style="margin-bottom: 10px;">STAGE 1 · 六维自测场景矩阵（开发快速勾选确认）</div>
+                                    <table class="editorial-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 24%;">测试维度</th>
+                                                <th style="width: 44%;">Copilot 辅助发散要点</th>
+                                                <th style="width: 32%;">推荐承载层级</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>01. 正常主链路</strong></td>
+                                                <td class="muted-cell">核心业务成功路径、标准入参与返回值校验</td>
+                                                <td>单元测试 + 核心 E2E 冒烟</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>02. 边界值条件</strong></td>
+                                                <td class="muted-cell">空值、零值、最大长度、分页临界、并发竞争</td>
+                                                <td>参数化单元测试（Table-driven）</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>03. 异常与容错</strong></td>
+                                                <td class="muted-cell">非法入参、下游超时、依赖服务报错、幂等重试</td>
+                                                <td>单元测试 + 契约/集成测试</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>04. 权限与多角色</strong></td>
+                                                <td class="muted-cell">未登录、越权访问、多租户隔离、只读角色拦截</td>
+                                                <td>API 集成测试</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>05. 状态流转</strong></td>
+                                                <td class="muted-cell">非预期顺序调用、重复提交、状态机回滚一致性</td>
+                                                <td>服务级集成测试</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>06. 数据与兼容</strong></td>
+                                                <td class="muted-cell">存量历史数据兼容、新旧字段默认值、事务完整性</td>
+                                                <td>数据库/接口集成测试</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div class="step-num" style="margin-bottom: 8px;">STAGE 2 · 结构化 Prompt 范式（防止 AI 臆造业务规则）</div>
+                                    <h3 class="h-sub">向 Copilot 提供“需求 + Diff + 明确免责指令”</h3>
+                                    <div class="code-ledger" style="margin-top: 10px; font-size: 13px;">【输入上下文】
+1. Issue 验收标准（AC）与业务规则说明
+2. 当前分支 git diff / 修改的函数与接口签名
+3. 仓库现有测试示例文件（参考目录结构与断言风格）
+
+【关键指令要求】
+请先按「正常、边界、异常、权限、状态流转、数据兼容」列出测试场景表格（含前置条件、输入、预期结果）。
+注意：任何需求未明确定义的业务规则，必须标注为【待开发确认】，严禁直接根据当前实现代码自行假设业务预期！</div>
+                                </div>
+
+                                <div style="border-top: 1px solid var(--curr-border); padding-top: 14px;">
+                                    <div class="step-num" style="margin-bottom: 6px;">TEST PYRAMID ALLOCATION · 用例分层配比建议</div>
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                        <div>
+                                            <div class="stat-num" style="font-size: 36px;">70%</div>
+                                            <div class="body-copy" style="font-size: 14px;"><strong>单元与函数测试</strong><br>秒级反馈，覆盖分支与边界</div>
+                                        </div>
+                                        <div>
+                                            <div class="stat-num" style="font-size: 36px;">20%</div>
+                                            <div class="body-copy" style="font-size: 14px;"><strong>接口与模块集成</strong><br>覆盖权限、状态与数据一致性</div>
+                                        </div>
+                                        <div>
+                                            <div class="stat-num" style="font-size: 36px;">10%</div>
+                                            <div class="body-copy" style="font-size: 14px;"><strong>端到端冒烟/黄金旅程</strong><br>覆盖跨组件关键用户路径</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="boundary-strip reveal d3">
+                            <span class="boundary-label">KEY TAKEAWAY</span>
+                            <span class="boundary-text">开发团队缺的往往不是“写测试语法的时间”，而是“快速穷举边缘场景的视角”。让 Copilot 先输出 Markdown 场景矩阵贴入 PR 描述，开发只需花 2 分钟勾选确认即可转成测试代码。</span>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>QUESTION 1.1 (A) · RAPID TEST SUITE CONSTRUCTION</span>
+                        <span>SCENARIO MATRIX FIRST → HUMAN VERIFICATION → AUTOMATED TEST CODE</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 05: QUESTION 1.1B - TEST QUALITY ASSURANCE (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">QUESTION 01.1 (PART B) // QUALITY GATES FOR TESTS</span>
+                        <span class="gold-text">这些自测用例的质量如何保障？</span>
+                        <span class="latin-track">FOLIO 05 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">FOUR-LAYER QUALITY ASSURANCE · 防止“无效测试”与“虚假覆盖率”</span>
+                            </div>
+                            <h2 class="h-section">通过四道工程门禁，保障开发自测用例的<em>有效性、准确性与可演进性</em></h2>
+                            <p class="lead" style="font-size: 18.5px;">没有专职 QA 时，不能靠人工逐行抽检所有测试，必须把“测试用例本身的质量检查”固化到 PR 评审与 CI 流水线中。</p>
+                        </div>
+
+                        <div class="cols-4 reveal d2">
+                            <div class="col-cell">
+                                <div>
+                                    <div class="stat-num" style="margin-bottom: 12px;">01</div>
+                                    <h3 class="h-sub">需求可追踪性对齐</h3>
+                                    <p class="body-copy" style="font-size: 15.5px; margin-bottom: 12px;">每一条验收标准（AC）都必须有对应的测试函数或自测勾选项支撑。</p>
+                                    <ul class="signal-list">
+                                        <li>PR 描述中保留“验收项 ↔ 测试用例”映射清单。</li>
+                                        <li>确保新增功能与修改逻辑不存在“无测试裸奔”分支。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">GATE 1: AC TRACEABILITY</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="stat-num" style="margin-bottom: 12px;">02</div>
+                                    <h3 class="h-sub">业务预期人工复核</h3>
+                                    <p class="body-copy" style="font-size: 15.5px; margin-bottom: 12px;">重点审查测试里的 <span style="font-family:var(--font-mono);color:var(--gold);">assert / expect</span> 是否真正校验了业务结果。</p>
+                                    <ul class="signal-list">
+                                        <li>拒绝“只调用不校验返回值”的凑覆盖率测试。</li>
+                                        <li>拒绝过度 Mock 导致只测了 Mock 本身的空壳测试。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">GATE 2: ASSERTION VALIDITY</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="stat-num" style="margin-bottom: 12px;">03</div>
+                                    <h3 class="h-sub">Copilot CR + CI 门禁</h3>
+                                    <p class="body-copy" style="font-size: 15.5px; margin-bottom: 12px;">利用 Copilot Code Review 配合 GitHub Rulesets 强制拦截低质改动。</p>
+                                    <ul class="signal-list">
+                                        <li>配置审查指令：专项检查 PR 是否缺失异常/边界测试、是否存在脆弱断言。</li>
+                                        <li>Actions 强制要求增量代码测试通过方可合并。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">GATE 3: AUTOMATED REVIEW &amp; CI</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="stat-num" style="margin-bottom: 12px;">04</div>
+                                    <h3 class="h-sub">漏测沉淀与变异测试</h3>
+                                    <p class="body-copy" style="font-size: 15.5px; margin-bottom: 12px;">用线上/联调漏测反哺用例集，并对核心模块引入变异测试。</p>
+                                    <ul class="signal-list">
+                                        <li>每次修复 Bug 必须先补一个能复现该 Bug 的回归测试。</li>
+                                        <li>对计费/权限等核心模块用变异测试检验断言检出率。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">GATE 4: ESCAPED BUGS &amp; MUTATION</div>
+                            </div>
+                        </div>
+
+                        <div class="boundary-strip reveal d3">
+                            <span class="boundary-label">CRITICAL INSIGHT · 覆盖率陷阱警示</span>
+                            <span class="boundary-text">
+                                <strong>高代码行覆盖率 ≠ 高质量测试。</strong>即使行覆盖率达到 90%，若断言缺失或未覆盖状态组合，依然会漏掉严重业务缺陷。衡量自测用例集质量的核心指标应当是：<em>断言有效性、边界场景覆盖度、以及历史缺陷回归拦截率</em>。
+                            </span>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>QUESTION 1.1 (B) · SAFEGUARDING TEST SUITE QUALITY</span>
+                        <span>AC ALIGNMENT + ASSERTION AUDIT + COPILOT CODE REVIEW + REGRESSION FLYWHEEL</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 06: QUESTION 1.2 - TARGETED FUNCTIONAL TESTING (CREAM)
+                 =========================================== -->
+            <section class="slide surface-cream">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">QUESTION 01.2 // TARGETED &amp; TIERED TESTING</span>
+                        <span class="gold-text">如何高效开展针对性功能测试（避免每次全量回归）</span>
+                        <span class="latin-track">FOLIO 06 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">RISK-BASED TIERED EXECUTION · 按变更半径匹配测试范围与测试数据</span>
+                            </div>
+                            <h2 class="h-section">用<em>“三级分层执行 + 模块映射矩阵”</em>替代高成本的每次全量测试</h2>
+                            <p class="lead" style="font-size: 18.5px;">将测试资源集中在当前变更真正波及的模块与上下游链路上，让测试数据按标签按需初始化，兼顾反馈速度与拦截能力。</p>
+                        </div>
+
+                        <div class="tier-stack reveal d2">
+                            <div class="tier-band">
+                                <div>
+                                    <div class="step-num">TIER 01 · 每次提交 / PR</div>
+                                    <h3 class="h-sub" style="margin: 4px 0 0 0;">靶向增量 + 核心冒烟</h3>
+                                </div>
+                                <div class="body-copy" style="font-size: 15.5px; color: var(--curr-fg);">
+                                    根据 PR 修改的文件路径与模块依赖，<strong>仅运行受影响模块的单元/接口测试 + 极少量核心主链路冒烟测试（5~10 分钟内完成）</strong>。使用轻量级内存数据或模块专属最小 Fixture。
+                                </div>
+                                <div class="mono-note" style="text-align: right;">TRIGGER: pull_request<br>DATA: IN-MEMORY / MINIMAL SEED</div>
+                            </div>
+
+                            <div class="tier-band">
+                                <div>
+                                    <div class="step-num">TIER 02 · 跨模块 / 公共变更</div>
+                                    <h3 class="h-sub" style="margin: 4px 0 0 0;">关联链路与契约测试</h3>
+                                </div>
+                                <div class="body-copy" style="font-size: 15.5px; color: var(--curr-fg);">
+                                    当 PR 触及公共库、鉴权中间件、数据库 Schema 或对外 API 契约时，自动升级触发<strong>上下游关联模块集成测试与接口契约校验</strong>，并按标签拉起对应业务域测试数据集。
+                                </div>
+                                <div class="mono-note" style="text-align: right;">TRIGGER: shared-path / label<br>DATA: DOMAIN-SCOPED FIXTURES</div>
+                            </div>
+
+                            <div class="tier-band">
+                                <div>
+                                    <div class="step-num">TIER 03 · 夜间定时 / 发版前</div>
+                                    <h3 class="h-sub" style="margin: 4px 0 0 0;">全量回归 + 黄金场景走查</h3>
+                                </div>
+                                <div class="body-copy" style="font-size: 15.5px; color: var(--curr-fg);">
+                                    通过 GitHub Actions <span style="font-family:var(--font-mono);">schedule</span>（每日夜间）及 Release 候选分支触发<strong>全量自动化套件、性能基线与端到端黄金测试场景</strong>，集中分析大规模测试数据与环境表现。
+                                </div>
+                                <div class="mono-note" style="text-align: right;">TRIGGER: schedule / release<br>DATA: FULL STAGING SNAPSHOT</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;" class="reveal d3">
+                            <div class="boundary-strip">
+                                <div>
+                                    <div class="boundary-label" style="margin-bottom: 4px;">ASSET MAPPING · 建立“四元映射表”</div>
+                                    <p class="boundary-text" style="font-size: 15px;">
+                                        在仓库维护轻量级映射配置：<strong>代码目录 → 所属业务模块 → 关联测试 Tag（如 <span style="font-family:var(--font-mono);">@order</span>、<span style="font-family:var(--font-mono);">@auth</span>）→ 所需测试数据 Seed 脚本</strong>。PR 触发时只加载命中的 Tag 与对应测试数据，避免全量拉起无用数据。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="boundary-strip">
+                                <div>
+                                    <div class="boundary-label" style="margin-bottom: 4px;">ACTIONS PITFALL · 路径过滤与必过检查（Required Checks）陷阱</div>
+                                    <p class="boundary-text" style="font-size: 15px;">
+                                        若在 Workflow 顶层使用 <span style="font-family:var(--font-mono);">on.pull_request.paths</span> 过滤，当某次 PR 未命中路径导致整个 Workflow 被跳过时，GitHub 分支保护的 Required Check 会一直处于 <strong>Pending</strong> 无法合并。<strong>正确做法：</strong>使用 <span style="font-family:var(--font-mono);">paths-filter</span> + Job 级 <span style="font-family:var(--font-mono);">if</span> 条件，并保留一个始终汇总结果的轻量 Gate Job。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>QUESTION 1.2 · TARGETED FUNCTIONAL TESTING</span>
+                        <span>3-TIER EXECUTION + MODULE/DATA MAPPING + SAFE ACTIONS PATH FILTERING</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 07: QUESTION 2 - TEST SCRIPT COMPATIBILITY (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">QUESTION 02 // TEST SCRIPT COMPATIBILITY &amp; MAINTENANCE</span>
+                        <span class="gold-text">版本快速迭代下如何降低测试脚本的适配成本</span>
+                        <span class="latin-track">FOLIO 07 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">RESILIENT TEST ARCHITECTURE · 从“脆弱脚本”转向“高内聚架构 + AI 协同维护”</span>
+                            </div>
+                            <h2 class="h-section">五大工程手段化解版本高频迭代带来的<em>测试脚本适配负担</em></h2>
+                            <p class="lead" style="font-size: 18.5px;">测试脚本频繁失效的根源通常是“用例逻辑与页面/接口细节强耦合”以及“代码改了但测试滞后更新”。</p>
+                        </div>
+
+                        <div class="cols-3 reveal d2">
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">01 / 仓库级自定义指令规范</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">固化 <span style="font-family:var(--font-mono);color:var(--gold);">copilot-instructions.md</span></h3>
+                                    <ul class="signal-list" style="margin-top: 10px;">
+                                        <li>在 <span style="font-family:var(--font-mono);">.github/copilot-instructions.md</span>（及目录级 <span style="font-family:var(--font-mono);">*.instructions.md</span>）中明确：测试框架版本、目录结构、Mock 规范、公共 Helper 与命名约定。</li>
+                                        <li>让不同开发人员用 Copilot 生成/修改的脚本天然遵循同一套工程标准，避免风格碎片化。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">STANDARDIZATION: REPO INSTRUCTIONS</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">02 / 架构解耦与稳定标识</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">封装中间层，隔离变化点</h3>
+                                    <ul class="signal-list" style="margin-top: 10px;">
+                                        <li><strong>UI 测试：</strong>禁用脆弱的 CSS 层级/XPath，强制使用稳定的语义角色或专属 <span style="font-family:var(--font-mono);color:var(--gold);">data-testid</span>，并封装 Page Object / Component Model。</li>
+                                        <li><strong>接口测试：</strong>抽离统一 API Client 与数据工厂（Factory），接口字段变更只需改一处封装层，无需逐个修改上百条用例。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">ABSTRACTION: PAGE OBJECT &amp; DATA-TESTID</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">03 / AI 辅助适配与同步门禁</div>
+                                    <h3 class="h-sub" style="margin-top: 8px;">随 PR 同改 + 故障自愈工作流</h3>
+                                    <ul class="signal-list" style="margin-top: 10px;">
+                                        <li><strong>同 PR 同步演进：</strong>将“功能代码改动必须同步更新对应测试脚本”纳入 PR DoD 与 <span style="font-family:var(--font-mono);">CODEOWNERS</span> 评审。</li>
+                                        <li><strong>Copilot 辅助修复：</strong>将 PR Diff 与 Actions 失败堆栈一并交给 Copilot，快速定位是“功能真回归 Bug”还是“预期变更需更新脚本”。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">CO-EVOLUTION: PR DOD &amp; COPILOT FIX</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px;" class="reveal d3">
+                            <div class="code-ledger"># .github/copilot-instructions.md 测试规范片段示例
+- 所有 E2E 测试必须优先使用 getByRole 或 getByTestId('xxx')，严禁使用动态样式类名。
+- 接口请求必须通过 tests/helpers/apiClient.ts 调用，禁止在测试文件内硬编码 URL。
+- 构造测试数据统一使用 tests/factories/ 下的 Builder 函数，测试结束必须清理状态。</div>
+
+                            <div class="boundary-strip">
+                                <div>
+                                    <div class="boundary-label" style="margin-bottom: 6px;">FLAKY TEST GOVERNANCE · 不稳定测试隔离机制</div>
+                                    <p class="boundary-text" style="font-size: 15px;">
+                                        快速迭代中最怕“偶发失败（Flaky Tests）”拖垮开发对自测的信任。应在 GitHub Actions 中统计重试与失败率，将非确定性失败脚本移入<strong>隔离观察区（Quarantine）</strong>专项修复，确保主干 PR 门禁保持高信噪比。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>QUESTION 2 · TEST SCRIPT COMPATIBILITY</span>
+                        <span>CUSTOM INSTRUCTIONS + DECOUPLED LOCATORS + CO-EVOLUTION IN PR</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 08: PART II CHAPTER OPENER - VS CODE GOLDEN SCENARIOS (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy">
+                <div class="slide-frame" style="grid-template-rows: 1fr auto;">
+                    <div class="slide-body" style="justify-content: center;">
+                        <div style="max-width: 1380px;" class="reveal d1">
+                            <div class="step-num" style="font-size: 16px; margin-bottom: 18px;">CHAPTER II // BENCHMARK CASE STUDY</div>
+                            <div class="rule-short" style="margin-bottom: 28px; width: 56px; height: 2px;"></div>
+                            <h2 class="h-chapter" style="font-size: 64px; margin-bottom: 28px;">
+                                深度解析：VS Code 所谓的<br><em>“黄金测试场景（Golden Test Scenarios）”</em><br>究竟是如何生成的？
+                            </h2>
+                            <p class="lead" style="font-size: 23px; max-width: 1160px; margin-bottom: 44px;">
+                                很多团队误以为“黄金测试场景”是某个全自动生成的黑盒脚本库。事实上，在 VS Code 工程体系中，它是围绕<em>真实高频用户目标</em>精心设计、在真实环境中端到端走查、并通过 GitHub Issue 持续追踪演进的<em>关键用户旅程（End-to-End User Journeys）</em>。
+                            </p>
+
+                            <div class="cycle-grid-4 reveal d2" style="grid-template-columns: repeat(3, 1fr); gap: 40px;">
+                                <div class="cycle-step">
+                                    <div class="step-num">PILLAR 01 · GOLDEN SCENARIOS</div>
+                                    <h3 class="h-sub">端到端关键用户旅程</h3>
+                                    <p class="body-copy" style="font-size: 15.5px;">以真实开发者或数据科学家的完整任务为纲（如 <span style="font-family:var(--font-mono);color:var(--gold);">#283671</span> 完成一场 Kaggle 竞赛），专门检验多组件协同与 AI Agent 交互中的“衔接裂缝”。</p>
+                                </div>
+                                <div class="cycle-step">
+                                    <div class="step-num">PILLAR 02 · TEST PLAN ITEMS (TPI)</div>
+                                    <h3 class="h-sub">迭代测试计划工作项</h3>
+                                    <p class="body-copy" style="font-size: 15.5px;">在每个发布周期 Endgame 阶段，针对新增/修改特性编写带 <span style="font-family:var(--font-mono);color:var(--gold);">testplan-item</span> 标签的 GitHub Issue（如 <span style="font-family:var(--font-mono);">#158388</span>），组织全员交叉探索测试。</p>
+                                </div>
+                                <div class="cycle-step">
+                                    <div class="step-num">PILLAR 03 · SMOKE TESTS</div>
+                                    <h3 class="h-sub">核心冒烟自动化套件</h3>
+                                    <p class="body-copy" style="font-size: 15.5px;">沉淀在 <span style="font-family:var(--font-mono);color:var(--gold);">test/smoke/</span> 目录下基于 Playwright 的端到端自动化检查（搭配版本升级与热退出手工检查），守住每个构建包的基本盘。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d3">
+                        <span>PART II · VS CODE QUALITY ENGINEERING DEEP DIVE</span>
+                        <span>FOLIO 08 / 12</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 09: VS CODE CASE STUDY #283671 (CREAM)
+                 =========================================== -->
+            <section class="slide surface-cream">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">CASE STUDY // MICROSOFT/VSCODE#283671</span>
+                        <span class="gold-text">真实案例拆解：Notebook 黄金测试场景</span>
+                        <span class="latin-track">FOLIO 09 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">EMPIRICAL EVIDENCE · 从真实 GitHub Issue 看黄金场景的长相与价值</span>
+                            </div>
+                            <h2 class="h-section">解剖 <span class="latin-em">microsoft/vscode#283671</span>：<em>Notebook Golden Scenario: Kaggle Competition</em></h2>
+                            <p class="lead" style="font-size: 18.5px;">该黄金场景并非测试单个按钮，而是要求测试者在全新隔离容器中，仅借助 Copilot Chat 从零完成一场 Kaggle 竞赛并成功提交结果。</p>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 44px; flex: 1; border-top: 1px solid var(--curr-border); border-bottom: 1px solid var(--curr-border); padding: 22px 0;" class="reveal d2">
+                            <div style="border-right: 1px solid var(--curr-border); padding-right: 36px; display: flex; flex-direction: column;">
+                                <div class="step-num" style="margin-bottom: 14px;">END-TO-END USER JOURNEY · 黄金场景完整执行链路</div>
+                                <div class="vt-list">
+                                        <div class="vt-item">
+                                            <div style="font-weight:700;font-size:17px;">1. 真实初始环境构建</div>
+                                            <div class="body-copy" style="font-size:15px;">启动全新的 Python 3 Dev Container，确保无本地残留配置或预装依赖干扰。</div>
+                                        </div>
+                                        <div class="vt-item">
+                                            <div style="font-weight:700;font-size:17px;">2. 获取竞赛数据与安装依赖</div>
+                                            <div class="body-copy" style="font-size:15px;">通过 Copilot 引导下载 Kaggle 数据集，自动配置虚拟环境与科学计算包。</div>
+                                        </div>
+                                        <div class="vt-item">
+                                            <div style="font-weight:700;font-size:17px;">3. 创建与编辑 Jupyter Notebook</div>
+                                            <div class="body-copy" style="font-size:15px;">使用 Copilot Chat 创建 <span style="font-family:var(--font-mono);">.ipynb</span>，生成数据探索、特征工程与模型训练单元格。</div>
+                                        </div>
+                                        <div class="vt-item">
+                                            <div style="font-weight:700;font-size:17px;">4. 内核执行、报错诊断与迭代调优</div>
+                                            <div class="body-copy" style="font-size:15px;">运行单元格，当遇到缺包、维度不匹配或长耗时任务时，观察 Agent 诊断与修复表现。</div>
+                                        </div>
+                                        <div class="vt-item">
+                                            <div style="font-weight:700;font-size:17px;">5. 生成预测文件并完成竞赛提交</div>
+                                            <div class="body-copy" style="font-size:15px;">生成符合格式的提交文件并完成验证，检验端到端闭环是否顺畅。</div>
+                                        </div>
+                                    </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div class="step-num" style="margin-bottom: 8px;">FRICTION &amp; DEFECTS EXPOSED · 沿途暴露的跨组件摩擦点（单测无法发现）</div>
+                                    <h3 class="h-sub">为什么所有单测都绿，用户端到端体验却可能不及格？</h3>
+                                    <p class="body-copy" style="font-size: 15.5px; margin-bottom: 14px;">
+                                        在 <span style="font-family:var(--font-mono);">#283671</span> 走查中，虽然最终任务能够跑通，但沿途暴露了大量跨模块衔接问题，并被拆分为独立子 Issue 追踪：
+                                    </p>
+                                    <ul class="signal-list">
+                                        <li><strong>工具调用与命令冗余：</strong>Agent 在操作 Notebook 与终端时出现不必要的命令切换或重复安装包。</li>
+                                        <li><strong>编辑定位与单元格偏移：</strong>模型修改特定 Notebook Cell 时偶发插错位置或覆盖上下文。</li>
+                                        <li><strong>长耗时单元执行状态感知：</strong>训练耗时较长时，Agent 等待策略与中断反馈不够清晰。</li>
+                                        <li><strong>环境与内核状态不同步：</strong>容器内新装依赖后，Notebook Kernel 感知与重启提示存在断点。</li>
+                                    </ul>
+                                </div>
+
+                                <div class="boundary-strip" style="margin-top: 14px;">
+                                    <div>
+                                        <div class="boundary-label" style="margin-bottom: 4px;">GOLDEN SCENARIO INSIGHT · 核心工程启示</div>
+                                        <p class="boundary-text" style="font-size: 15px;">
+                                            <strong>“任务最终完成 ≠ 过程质量合格。”</strong>黄金测试场景的最大价值，就是站在真实用户视角，把散落在编辑器、Notebook 内核、终端、容器与 AI Agent 之间的<em>组合裂缝</em>一次性照出来。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d3">
+                        <span>CASE STUDY · MICROSOFT/VSCODE#283671</span>
+                        <span>TASK COMPLETION DOES NOT EQUAL ACCEPTABLE USER JOURNEY QUALITY</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 10: HOW GOLDEN SCENARIOS ARE GENERATED (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">METHODOLOGY // GENERATION &amp; EVOLUTION</span>
+                        <span class="gold-text">VS Code 黄金测试场景的生成逻辑与演进机制</span>
+                        <span class="latin-track">FOLIO 10 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">GENERATION MECHANISM · 黄金测试场景不是怎么来的 vs 真正是怎么生成的</span>
+                            </div>
+                            <h2 class="h-section">从<em>“真实用户高频目标”</em>出发，经四步循环沉淀为高价值黄金基线</h2>
+                        </div>
+
+                        <div class="cols-2 reveal d2" style="flex: 0 0 auto;">
+                            <div class="col-cell" style="padding: 22px 32px 22px 0;">
+                                <div>
+                                    <div class="step-num" style="margin-bottom: 8px;">WHAT IT IS NOT · 常见误解（它不是什么）</div>
+                                    <ul class="signal-list">
+                                        <li><span class="muted">不是 VS Code 产品内置的某个“一键自动生成黄金测试”按钮或专有功能。</span></li>
+                                        <li><span class="muted">不是单纯根据代码 AST 自动穷举出来的海量低价值单元测试。</span></li>
+                                        <li><span class="muted">不是孤立验证某一个 API 参数或某一个 UI 弹窗的局部用例。</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-cell" style="padding: 22px 0 22px 32px;">
+                                <div>
+                                    <div class="step-num" style="margin-bottom: 8px;">WHAT IT TRULY IS · 本质定义（它真正是什么）</div>
+                                    <ul class="signal-list">
+                                        <li>是工程团队围绕<strong>最高优用户价值提炼的代表性端到端业务剧本（Canonical User Journeys）</strong>。</li>
+                                        <li>兼具<strong>功能验收、跨模块集成验证与 AI 交互摩擦度评估</strong>三重作用。</li>
+                                        <li>以 GitHub Issue 为载体记录执行过程，并将发现的每个断点拆解为可闭环的缺陷单。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cycle-grid-4 reveal d3" style="flex: 1;">
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 01 / 锚定真实用户目标</div>
+                                <h3 class="h-sub">以“用户要完成什么事”立项</h3>
+                                <p class="body-copy" style="font-size: 15px;">不按代码模块划分，而按核心用户画像的真实任务切入（例如：“数据科学家在容器里用 AI 跑完比赛”、“前端开发者从零脚手架到调试部署”）。优先挑选跨越多特性的主干路径。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 02 / 固化环境与成功标准</div>
+                                <h3 class="h-sub">定义六要素标准契约</h3>
+                                <p class="body-copy" style="font-size: 15px;">每个黄金场景明确定义：<strong>① 用户角色、② 干净初始环境（如 Dev Container）、③ 起点前置条件、④ 关键阶段步骤、⑤ 阶段预期反应、⑥ 最终成功判据</strong>，确保不同成员走查标准一致。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 03 / 实战走查与问题裂变</div>
+                                <h3 class="h-sub">记录全过程摩擦并拆单</h3>
+                                <p class="body-copy" style="font-size: 15px;">工程师在真实构建版本上完整跑通旅程，不仅看结果是否成功，更记录每一步的报错、卡顿、返工与困惑，在主场景 Issue 下关联派生出一个个具体的 Bug / Polish Issue。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">STEP 04 / 持续复跑与自动化下沉</div>
+                                <h3 class="h-sub">跨版本对比与分层固化</h3>
+                                <p class="body-copy" style="font-size: 15px;">随着版本迭代反复重跑同一黄金场景，检验体验是否真正改善；同时将其中确定性强的核心链路下沉转化为自动化 Smoke / 集成测试。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>GOLDEN SCENARIO GENERATION WORKFLOW</span>
+                        <span>USER GOAL SELECTION → CLEAN ENVIRONMENT SPEC → FRICTION TRIAGE → ITERATIVE RE-RUN</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 11: VSCODE 3-LAYER QUALITY SYSTEM (CREAM)
+                 =========================================== -->
+            <section class="slide surface-cream">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">SYSTEM ARCHITECTURE // THREE-LAYER SYNERGY</span>
+                        <span class="gold-text">黄金测试场景、Test Plan Item 与 Smoke Test 如何协同？</span>
+                        <span class="latin-track">FOLIO 11 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">DEFENSE IN DEPTH · VS Code 保障快速迭代质量的三大支柱对比</span>
+                            </div>
+                            <h2 class="h-section">三类机制各司其职：<em>黄金场景抓端到端体验，TPI 抓当期新特性，Smoke 守底线回归</em></h2>
+                        </div>
+
+                        <div class="cols-3 reveal d2">
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">LAYER 01 · GOLDEN SCENARIOS</div>
+                                    <h3 class="h-sub" style="margin-top: 6px;">黄金测试场景（端到端旅程）</h3>
+                                    <p class="mono-note" style="margin-bottom: 12px;">代表案例：microsoft/vscode#283671</p>
+                                    <ul class="signal-list">
+                                        <li><strong>核心定位：</strong>验证跨组件、长链路、特别是含 AI Agent 协同的真实用户目标能否丝滑完成。</li>
+                                        <li><strong>生成方式：</strong>按核心用户画像提炼端到端剧本，在干净环境中实战走查并拆分摩擦点 Issue。</li>
+                                        <li><strong>解决痛点：</strong>专门发现“单点功能都正常，但拼在一起不好用或走不通”的系统性断层。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">FOCUS: E2E JOURNEY &amp; UX FRICTION</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">LAYER 02 · TEST PLAN ITEMS (TPI)</div>
+                                    <h3 class="h-sub" style="margin-top: 6px;">迭代测试计划项（<span style="font-family:var(--font-mono);">testplan-item</span>）</h3>
+                                    <p class="mono-note" style="margin-bottom: 12px;">代表案例：microsoft/vscode#158388 &amp; Wiki 规范</p>
+                                    <ul class="signal-list">
+                                        <li><strong>核心定位：</strong>在每个版本发布前（Endgame 周），针对本期新增/改动特性进行团队交叉手工探索验证。</li>
+                                        <li><strong>标准结构：</strong>Issue 顶部包含元数据头（关联特性、复杂度、支持平台 <span style="font-family:var(--font-mono);">anyOS</span>、勾选框），正文面向<strong>未参与该功能开发的其他工程师</strong>写清前置配置与测试要点。</li>
+                                        <li><strong>解决痛点：</strong>打破“写代码的人自己测自己的盲区”，无需专职 QA 即可实现高质量内部互测。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">FOCUS: NEW FEATURE CROSS-TEAM VERIFICATION</div>
+                            </div>
+
+                            <div class="col-cell">
+                                <div>
+                                    <div class="step-num">LAYER 03 · SMOKE TESTS</div>
+                                    <h3 class="h-sub" style="margin-top: 6px;">冒烟测试套件（<span style="font-family:var(--font-mono);">test/smoke/</span>）</h3>
+                                    <p class="mono-note" style="margin-bottom: 12px;">技术栈：Playwright 自动化 + 关键手工检查</p>
+                                    <ul class="signal-list">
+                                        <li><strong>核心定位：</strong>快速验证构建产物在 Web / Electron 各端的核心基础能力是否可用。</li>
+                                        <li><strong>执行机制：</strong>按功能域分片（Terminal、Task、Debug、Localization 等）自动化运行，支持针对特定 Feature 单独跑对应套件；辅以版本升级（Upgrades）与热退出（Hot Exit）手工验证。</li>
+                                        <li><strong>解决痛点：</strong>以极低耗时守住每次打包发版的基础可用性底线。</li>
+                                    </ul>
+                                </div>
+                                <div class="mono-note">FOCUS: FAST AUTOMATED BASELINE REGRESSION</div>
+                            </div>
+                        </div>
+
+                        <div class="boundary-strip reveal d3">
+                            <span class="boundary-label">ARCHITECTURAL SYNERGY</span>
+                            <span class="boundary-text">
+                                这三层机制形成了完整飞轮：<strong>当期新改动先通过 TPI（开发交叉互测）把关 → 跨模块的真实复杂工作流通过 Golden Scenarios 暴露深层摩擦 → 稳定高频的核心路径沉淀进 Smoke Tests 自动守护。</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>VS CODE THREE-PILLAR QUALITY MATRIX</span>
+                        <span>GOLDEN SCENARIOS (JOURNEY) + TEST PLAN ITEMS (ENDGAME PEER TEST) + SMOKE TESTS (AUTOMATED BASELINE)</span>
+                    </footer>
+                </div>
+            </section>
+
+            <!-- ===========================================
+                 SLIDE 12: ACTIONABLE ROADMAP FOR CUSTOMERS (NAVY)
+                 =========================================== -->
+            <section class="slide surface-navy">
+                <div class="slide-frame">
+                    <header class="chrome-bar reveal d1">
+                        <span class="latin-track">IMPLEMENTATION ROADMAP // CUSTOMER PLAYBOOK</span>
+                        <span class="gold-text">客户落地指南：将黄金场景方法论与 GitHub 平台结合</span>
+                        <span class="latin-track">FOLIO 12 / 12</span>
+                    </header>
+
+                    <div class="slide-body">
+                        <div class="header-band reveal d1">
+                            <div class="kicker-block">
+                                <span class="rule-short"></span>
+                                <span class="kicker">ACTIONABLE PLAYBOOK · 如何用 GitHub + Copilot 生成并维护团队自己的黄金测试场景</span>
+                            </div>
+                            <h2 class="h-section">四步生成企业专属<em>黄金测试场景</em>，并按三阶段渐进落地开发自测体系</h2>
+                        </div>
+
+                        <div class="cycle-grid-4 reveal d2" style="flex: 1;">
+                            <div class="cycle-step">
+                                <div class="step-num">01 / 人工锚定核心旅程</div>
+                                <h3 class="h-sub">选定 5~10 条黄金业务流</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">由业务负责人与核心开发梳理最不能出错的端到端用户旅程（如“新用户注册→开通权限→创建核心资源→支付结算”），建立 <span style="font-family:var(--font-mono);color:var(--gold);">golden-scenario</span> Issue 模板。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">02 / Copilot 扩展候选场景</div>
+                                <h3 class="h-sub">结合版本 Diff 生成检查单</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">每个迭代周期，将关联 Issue 验收标准与 PR Diff 输入 Copilot，自动推演该黄金旅程在本期可能受影响的支线、边界与异常恢复点。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">03 / 开发互测与预期确认</div>
+                                <h3 class="h-sub">借鉴 TPI 开展交叉走查</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">借鉴 VS Code <span style="font-family:var(--font-mono);color:var(--gold);">testplan-item</span> 机制，在发版前让非本模块开发者按场景清单交叉走查，人工确认业务预期并拆解发现的体验断点。</p>
+                            </div>
+                            <div class="cycle-step">
+                                <div class="step-num">04 / 分层沉淀与脚本自愈</div>
+                                <h3 class="h-sub">固化进 Actions 与指令库</h3>
+                                <p class="body-copy" style="font-size: 15.5px;">将黄金场景中稳定的主干步骤转化为 Playwright / API 冒烟脚本，结合 <span style="font-family:var(--font-mono);color:var(--gold);">copilot-instructions.md</span> 与路径分级触发，实现低成本长期演进。</p>
+                            </div>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--curr-border); padding-top: 22px;" class="reveal d3">
+                            <div class="step-num" style="margin-bottom: 14px;">PILOT ROLLOUT ROADMAP · 建议客户在一个核心仓库开展 3 阶段试点</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;">
+                                <div style="background: var(--curr-panel); border: 1px solid var(--curr-border); border-top: 1px solid var(--gold); padding: 22px 24px;">
+                                    <div class="step-num">PHASE 1 · 第 1~2 周（打通变更与规范）</div>
+                                    <div style="font-size: 18px; font-weight: 700; margin: 6px 0 8px 0; color: var(--text-warm);">变更透明化 + 仓库测试指令</div>
+                                    <p class="body-copy" style="font-size: 15px;">落地 Issue/PR 自测模板、<span style="font-family:var(--font-mono);">.github/release.yml</span> 自动变更归类，以及 <span style="font-family:var(--font-mono);">.github/copilot-instructions.md</span> 测试生成规范。</p>
+                                </div>
+                                <div style="background: var(--curr-panel); border: 1px solid var(--curr-border); border-top: 1px solid var(--gold); padding: 22px 24px;">
+                                    <div class="step-num">PHASE 2 · 第 3~4 周（场景矩阵与靶向 CI）</div>
+                                    <div style="font-size: 18px; font-weight: 700; margin: 6px 0 8px 0; color: var(--text-warm);">两步法生测 + Actions 分层回归</div>
+                                    <p class="body-copy" style="font-size: 15px;">推行“Copilot 先生成六维场景清单→人工确认→转测试代码”，并在 GitHub Actions 中落地 PR 靶向测试与 Gate Job。</p>
+                                </div>
+                                <div style="background: var(--curr-panel); border: 1px solid var(--curr-border); border-top: 1px solid var(--gold); padding: 22px 24px;">
+                                    <div class="step-num">PHASE 3 · 第 5~6 周（黄金场景与 TPI 互测）</div>
+                                    <div style="font-size: 18px; font-weight: 700; margin: 6px 0 8px 0; color: var(--text-warm);">沉淀 5~10 条黄金旅程 + 交叉验证</div>
+                                    <p class="body-copy" style="font-size: 15px;">建立核心业务 Golden Scenarios 与发版前 <span style="font-family:var(--font-mono);">testplan-item</span> 交叉互测机制，把高频主链路下沉为自动化 Smoke 套件。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="foot-bar reveal d4">
+                        <span>GITHUB SDLC QUALITY PLAYBOOK · COMPLETE</span>
+                        <span>GITHUB ISSUES · PULL REQUESTS · RELEASES · COPILOT · ACTIONS</span>
+                    </footer>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Navigation Chrome Outside Stage -->
+    <nav class="deck-controls" aria-label="Slide navigation">
+        <button class="nav-btn" id="prevBtn" aria-label="Previous slide">← PREV</button>
+        <div class="nav-dots" id="navDots"></div>
+        <span id="slideCounter">01 / 12</span>
+        <button class="nav-btn" id="nextBtn" aria-label="Next slide">NEXT →</button>
+    </nav>
+
+    <script>
+        /* ===========================================
+           SLIDE PRESENTATION CONTROLLER
+           Fixed 1920x1080 Stage Scaler + Navigation
+           =========================================== */
+        class SlidePresentation {
+            constructor() {
+                this.slides = Array.from(document.querySelectorAll('.slide'));
+                this.currentSlide = 0;
+                this.stage = document.getElementById('deckStage');
+                this.counterEl = document.getElementById('slideCounter');
+                this.dotsContainer = document.getElementById('navDots');
+
+                this.setupStageScale();
+                this.setupDots();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupWheelNav();
+                this.showSlide(0);
+            }
+
+            setupStageScale() {
+                const scale = () => {
+                    const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                    const x = (window.innerWidth - 1920 * factor) / 2;
+                    const y = (window.innerHeight - 1080 * factor) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+                };
+                scale();
+                window.addEventListener('resize', scale);
+            }
+
+            setupDots() {
+                this.slides.forEach((_, idx) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'nav-dot';
+                    dot.setAttribute('aria-label', `Go to slide ${idx + 1}`);
+                    dot.addEventListener('click', () => this.showSlide(idx));
+                    this.dotsContainer.appendChild(dot);
+                });
+                document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+                document.getElementById('nextBtn').addEventListener('click', () => this.next());
+            }
+
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.getAttribute('contenteditable') === 'true') return;
+                    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                        e.preventDefault();
+                        this.next();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                        e.preventDefault();
+                        this.prev();
+                    } else if (e.key === 'Home') {
+                        e.preventDefault();
+                        this.showSlide(0);
+                    } else if (e.key === 'End') {
+                        e.preventDefault();
+                        this.showSlide(this.slides.length - 1);
+                    }
+                });
+            }
+
+            setupTouchNav() {
+                let startX = 0;
+                window.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                }, { passive: true });
+                window.addEventListener('touchend', (e) => {
+                    const diff = startX - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 50) {
+                        diff > 0 ? this.next() : this.prev();
+                    }
+                }, { passive: true });
+            }
+
+            setupWheelNav() {
+                let locked = false;
+                window.addEventListener('wheel', (e) => {
+                    if (locked) return;
+                    if (Math.abs(e.deltaY) > 35) {
+                        locked = true;
+                        e.deltaY > 0 ? this.next() : this.prev();
+                        setTimeout(() => { locked = false; }, 550);
+                    }
+                }, { passive: true });
+            }
+
+            next() {
+                this.showSlide(this.currentSlide + 1);
+            }
+
+            prev() {
+                this.showSlide(this.currentSlide - 1);
+            }
+
+            showSlide(index) {
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.slides.forEach((slide, i) => {
+                    const isActive = i === this.currentSlide;
+                    slide.classList.toggle('active', isActive);
+                    slide.classList.toggle('visible', isActive);
+                });
+                const dots = this.dotsContainer.querySelectorAll('.nav-dot');
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === this.currentSlide));
+                const num = String(this.currentSlide + 1).padStart(2, '0');
+                const total = String(this.slides.length).padStart(2, '0');
+                this.counterEl.textContent = `${num} / ${total}`;
+            }
+        }
+
+        /* ===========================================
+           INLINE EDITING CONTROLLER
+           Hover top-left corner or press 'E' to toggle
+           =========================================== */
+        class InlineEditor {
+            constructor() {
+                this.isActive = false;
+                this.storageKey = 'signal-github-sdlc-slides-v3';
+                this.editableSelector = 'h1, h2, h3, p, li, td, th, .kicker, .boundary-text';
+                this.hotzone = document.getElementById('editHotzone');
+                this.toggleBtn = document.getElementById('editToggle');
+                this.hideTimeout = null;
+
+                this.restoreSavedContent();
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                this.toggleBtn.addEventListener('click', () => this.toggleEditMode());
+                this.hotzone.addEventListener('click', () => this.toggleEditMode());
+
+                this.hotzone.addEventListener('mouseenter', () => {
+                    clearTimeout(this.hideTimeout);
+                    this.toggleBtn.classList.add('show');
+                });
+                this.hotzone.addEventListener('mouseleave', () => {
+                    this.hideTimeout = setTimeout(() => {
+                        if (!this.isActive) this.toggleBtn.classList.remove('show');
+                    }, 400);
+                });
+                this.toggleBtn.addEventListener('mouseenter', () => {
+                    clearTimeout(this.hideTimeout);
+                });
+                this.toggleBtn.addEventListener('mouseleave', () => {
+                    this.hideTimeout = setTimeout(() => {
+                        if (!this.isActive) this.toggleBtn.classList.remove('show');
+                    }, 400);
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) {
+                        e.preventDefault();
+                        this.toggleEditMode();
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                        e.preventDefault();
+                        this.saveToLocalStorage();
+                        this.exportHTMLFile();
+                    }
+                });
+            }
+
+            toggleEditMode() {
+                this.isActive = !this.isActive;
+                this.toggleBtn.classList.toggle('active', this.isActive);
+                this.toggleBtn.classList.toggle('show', this.isActive);
+                this.toggleBtn.textContent = this.isActive ? '✓ EDITING (CTRL+S SAVE)' : '✎ EDIT DECK';
+
+                const elements = document.querySelectorAll(this.editableSelector);
+                elements.forEach((el, idx) => {
+                    if (this.isActive) {
+                        el.setAttribute('contenteditable', 'true');
+                        el.dataset.editIdx = idx;
+                        el.addEventListener('input', () => this.saveToLocalStorage());
+                    } else {
+                        el.removeAttribute('contenteditable');
+                    }
+                });
+            }
+
+            saveToLocalStorage() {
+                const data = {};
+                document.querySelectorAll(this.editableSelector).forEach((el, idx) => {
+                    data[idx] = el.innerHTML;
+                });
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(data));
+                } catch (_) {}
+            }
+
+            restoreSavedContent() {
+                try {
+                    const raw = localStorage.getItem(this.storageKey);
+                    if (!raw) return;
+                    const data = JSON.parse(raw);
+                    document.querySelectorAll(this.editableSelector).forEach((el, idx) => {
+                        if (data[idx] !== undefined) el.innerHTML = data[idx];
+                    });
+                } catch (_) {}
+            }
+
+            exportHTMLFile() {
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+                const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'github-ai-testing-and-vscode-golden-scenarios.html';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+        }
+
+        const deck = new SlidePresentation();
+        const editor = new InlineEditor();
+    </script>
+</body>
+</html>
